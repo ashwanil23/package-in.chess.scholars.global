@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292458577869",
+    "project_id": "scholar-s-chess",
+    "storage_bucket": "scholar-s-chess.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292458577869:android:a7401b582c6585cdf34e84",
+        "android_client_info": {
+          "package_name": "in.chess.scholars.global"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC73L6P3Y1XyOphzuSnLoO3QpY9mNhmKt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
