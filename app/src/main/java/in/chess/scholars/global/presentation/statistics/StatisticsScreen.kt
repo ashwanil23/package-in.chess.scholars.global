@@ -219,7 +219,7 @@ private fun RatingProgressGraph(ratingHistory: List<RatingPoint>) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text("Rating Progress", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(modifier = Modifier.height(20.dp))
-            if (ratingHistory.size < 2) {
+            if (ratingHistory.isEmpty()) {
                 Text("Play more games to see your progress.", color = Color.Gray, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             } else {
                 Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {

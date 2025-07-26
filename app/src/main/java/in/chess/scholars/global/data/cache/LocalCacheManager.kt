@@ -2,6 +2,7 @@ package `in`.chess.scholars.global.data.cache
 
 import android.content.Context
 import androidx.room.*
+import com.google.firebase.Timestamp
 import `in`.chess.scholars.global.domain.model.GameHistory
 import `in`.chess.scholars.global.domain.model.GameResultStats
 import `in`.chess.scholars.global.domain.model.GameState
@@ -15,6 +16,7 @@ import `in`.chess.scholars.global.domain.model.Transaction
 import `in`.chess.scholars.global.domain.model.TransactionStatus
 import `in`.chess.scholars.global.domain.model.TransactionType
 import `in`.chess.scholars.global.domain.model.UserData
+import java.util.Date
 
 /**
  * Room Database for local caching
@@ -356,7 +358,7 @@ class LocalCacheManager(
             currentPlayer = gameState.status,
             moves = json.encodeToString(gameState.moves),
             status = gameState.status,
-            lastMoveTime = gameState.endedAt ?: System.currentTimeMillis(),
+            lastMoveTime = gameState.endedAt?.toDate()?.time ?: System.currentTimeMillis(),
             player1Id = gameState.player1Id,
             player2Id = gameState.player2Id,
             betAmount = 0f // You'll need to add this to GameState
@@ -385,8 +387,8 @@ class LocalCacheManager(
                 status = cached.status,
                 winner = null,
                 drawReason = null,
-                createdAt = 0L,
-                endedAt = cached.lastMoveTime
+                createdAt = null,
+                endedAt = Timestamp(Date(cached.lastMoveTime))
             )
         }
     }

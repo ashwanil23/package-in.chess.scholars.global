@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import `in`.chess.scholars.global.domain.model.GameHistory
 import `in`.chess.scholars.global.domain.model.RatingPoint
+import `in`.chess.scholars.global.domain.model.UserData
 import `in`.chess.scholars.global.domain.repository.DataResult
 import `in`.chess.scholars.global.domain.usecases.GetCurrentUserIdUseCase
 import `in`.chess.scholars.global.domain.usecases.GetGameHistoryUseCase
@@ -12,6 +13,7 @@ import `in`.chess.scholars.global.domain.usecases.GetUserDataUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 data class StatisticsUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
+    val userData: UserData? = null,
     val totalGames: Int = 0,
     val wins: Int = 0,
     val losses: Int = 0,
@@ -64,28 +67,27 @@ class StatisticsViewModel(
             }
 
             // Fetch all data concurrently
-            val userDataResult = getUserDataUseCase(userId) // This is a Flow, we'll collect the first value for initial load
+            val userDataResult: DataResult<UserData> = getUserDataUseCase(userId).first() // Get the first result and stop collecting
             val gameHistoryResult = getGameHistoryUseCase(userId)
             val ratingHistoryResult = getRatingHistoryUseCase(userId)
 
             // Process results
-            var finalState = StatisticsUiState(isLoading = false)
+            var finalState = _uiState.value.copy(isLoading = false) // Start with current state
 
             // Process User Data
-            userDataResult.collect { result ->
-                if (result is DataResult.Success) {
-                    val userData = result.data
-                    finalState = finalState.copy(
-                        totalGames = userData.gamesPlayed,
-                        wins = userData.wins,
-                        losses = userData.losses,
-                        draws = userData.draws,
-                        currentRating = userData.rating,
-                        winRate = if (userData.gamesPlayed > 0) (userData.wins.toFloat() / userData.gamesPlayed) * 100 else 0f
-                    )
-                } else if (result is DataResult.Error) {
-                    finalState = finalState.copy(error = result.exception.message)
-                }
+            if (userDataResult is DataResult.Success) {
+                val userData = userDataResult.data
+                finalState = finalState.copy(
+                    userData = userData,
+                    totalGames = userData.gamesPlayed,
+                    wins = userData.wins,
+                    losses = userData.losses,
+                    draws = userData.draws,
+                    currentRating = userData.rating,
+                    winRate = if (userData.gamesPlayed > 0) (userData.wins.toFloat() / userData.gamesPlayed) * 100 else 0f
+                )
+            }else if (userDataResult is DataResult.Error) {
+                finalState = finalState.copy(error = userDataResult.exception.message)
             }
 
 

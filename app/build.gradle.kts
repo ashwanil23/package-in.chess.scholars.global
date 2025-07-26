@@ -115,4 +115,5 @@ dependencies {
 
     // DataStore for preferences (optional, for app settings)
     implementation ("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("com.google.ai.client.generativeai:generativeai:0.3.0")
 }

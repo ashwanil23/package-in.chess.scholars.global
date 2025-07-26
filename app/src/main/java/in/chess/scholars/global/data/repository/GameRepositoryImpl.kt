@@ -11,6 +11,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.Timestamp
 
 class GameRepositoryImpl(
     private val firestore: FirebaseFirestore
@@ -46,7 +47,7 @@ class GameRepositoryImpl(
             val newGame = GameState(
                 player1Id = player1Id,
                 player2Id = player2Id,
-                createdAt = System.currentTimeMillis()
+                createdAt = Timestamp.now()
                 // betAmount should be a field in the GameState data class
             )
             val documentRef = firestore.collection("games").add(newGame).await()
@@ -84,7 +85,7 @@ class GameRepositoryImpl(
         return try {
             val gameRef = firestore.collection("games").document(gameId)
             val updates = mutableMapOf<String, Any?>()
-            updates["endedAt"] = System.currentTimeMillis()
+            updates["endedAt"] = FieldValue.serverTimestamp()
 
             when (result) {
                 is GameResult.Win -> {

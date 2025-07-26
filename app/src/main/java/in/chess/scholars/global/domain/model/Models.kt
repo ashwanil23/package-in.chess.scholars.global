@@ -1,5 +1,8 @@
 package `in`.chess.scholars.global.domain.model
 
+import com.google.firebase.firestore.ServerTimestamp
+import com.google.firebase.Timestamp
+
 data class UserData(
     val uid: String = "",
     val email: String = "",
@@ -153,7 +156,9 @@ data class GameState(
     val status: String = "in_progress", // e.g., "in_progress", "finished", "draw"
     val winner: String? = null, // "WHITE" or "BLACK"
     val drawReason: String? = null,
-    val createdAt: Long = 0L,
-    val endedAt: Long? = null
+    @ServerTimestamp // Add this annotation
+    val createdAt: Timestamp? = null, // Change Long to Timestamp? and default to null
+    @ServerTimestamp
+    val endedAt: Timestamp? = null // Change Long? to Timestamp? for consistency
 )
 

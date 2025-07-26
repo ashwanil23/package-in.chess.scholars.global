@@ -200,6 +200,7 @@
 
 package `in`.chess.scholars.global.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -208,8 +209,10 @@ import com.google.firebase.firestore.Transaction
 import `in`.chess.scholars.global.domain.repository.MatchmakingRepository
 import `in`.chess.scholars.global.domain.repository.MatchmakingState
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlin.math.abs
@@ -293,7 +296,10 @@ class MatchmakingRepositoryImpl(
                     }
 
                 // Actively search for opponents
-                searchForOpponent(userRating, betAmount)
+                while (isActive) {
+                    searchForOpponent(userRating, betAmount)
+                    delay(5000) // Poll for a new opponent every 5 seconds
+                }
 
             } catch (e: Exception) {
                 trySend(MatchmakingState.Error(e.message ?: "Failed to find a match"))
@@ -314,15 +320,17 @@ class MatchmakingRepositoryImpl(
             // Query for suitable opponents
             val potentialOpponents = firestore.collection("matchmaking")
                 .whereEqualTo("status", "searching")
-                .whereEqualTo("betAmount", betAmount)
-                .whereGreaterThanOrEqualTo("rating", userRating - RATING_TOLERANCE)
-                .whereLessThanOrEqualTo("rating", userRating + RATING_TOLERANCE)
+                .whereEqualTo("betAmount", betAmount.toInt())
                 .get()
                 .await()
 
             // Filter out self and find best match
             val suitableOpponent = potentialOpponents.documents
                 .filter { it.id != currentUserId }
+                .filter { doc ->
+                    val opponentRating = doc.getLong("rating")?.toInt() ?: 0
+                    val ratingDiff = abs(userRating - opponentRating)
+                    ratingDiff <= RATING_TOLERANCE }
                 .minByOrNull { doc ->
                     val opponentRating = doc.getLong("rating")?.toInt() ?: 0
                     abs(userRating - opponentRating)
@@ -337,6 +345,7 @@ class MatchmakingRepositoryImpl(
     }
 
     private suspend fun attemptMatch(opponentId: String, betAmount: Float) {
+        Log.d("Matchmaking", "Attempting to match with opponent: $opponentId")
         try {
             val result = firestore.runTransaction { transaction ->
                 val myDocRef = firestore.collection("matchmaking").document(currentUserId!!)
@@ -345,13 +354,31 @@ class MatchmakingRepositoryImpl(
                 val myDoc = transaction.get(myDocRef)
                 val opponentDoc = transaction.get(opponentDocRef)
 
-                // Verify both are still searching
-                if (myDoc.getString("status") != "searching" ||
-                    opponentDoc.getString("status") != "searching") {
+                // --- Logging Step 1: Check if documents exist ---
+                if (!myDoc.exists()) {
+                    Log.e("Matchmaking", "My own document does not exist in transaction!")
+                    return@runTransaction null
+                }
+                if (!opponentDoc.exists()) {
+                    Log.e("Matchmaking", "Opponent's document does not exist in transaction!")
                     return@runTransaction null
                 }
 
-                // Create game document
+                val myStatus = myDoc.getString("status")
+                val opponentStatus = opponentDoc.getString("status")
+
+                // --- Logging Step 2: Check player statuses ---
+                Log.d("Matchmaking", "My status: '$myStatus', Opponent status: '$opponentStatus'")
+
+                // Verify both are still searching
+                if (myStatus != "searching" || opponentStatus != "searching") {
+                    Log.w("Matchmaking", "Aborting transaction: One or both players are not 'searching'.")
+                    return@runTransaction null
+                }
+
+                // --- Logging Step 3: If checks pass, create the game ---
+                Log.d("Matchmaking", "Checks passed. Creating game and updating documents.")
+
                 val gameId = firestore.collection("games").document().id
                 val gameData = hashMapOf(
                     "gameId" to gameId,
@@ -360,12 +387,12 @@ class MatchmakingRepositoryImpl(
                     "player1Color" to "WHITE",
                     "player2Color" to "BLACK",
                     "currentPlayer" to "WHITE",
-                    "betAmount" to betAmount,
+                    "betAmount" to betAmount.toInt(), // Make sure this is still an Int
                     "status" to "active",
                     "moves" to emptyList<Map<String, Any>>(),
                     "createdAt" to FieldValue.serverTimestamp(),
                     "lastMoveAt" to FieldValue.serverTimestamp(),
-                    "board" to initializeBoard()
+                    "board" to initializeBoard() // Assuming this function exists
                 )
 
                 transaction.set(firestore.collection("games").document(gameId), gameData)
@@ -387,10 +414,14 @@ class MatchmakingRepositoryImpl(
             }.await()
 
             if (result != null) {
-                // Match successful - listener will handle the state update
+                Log.i("Matchmaking", "Transaction SUCCEEDED. Game created: $result")
+            } else {
+                Log.w("Matchmaking", "Transaction returned null. Match was likely already taken.")
             }
+
         } catch (e: Exception) {
-            // Transaction failed, continue searching
+            // --- Logging Step 4: Catch any unexpected transaction errors ---
+            Log.e("Matchmaking", "Transaction FAILED with exception.", e)
         }
     }
 

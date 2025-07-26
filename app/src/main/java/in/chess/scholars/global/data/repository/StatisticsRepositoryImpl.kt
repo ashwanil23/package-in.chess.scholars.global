@@ -26,14 +26,14 @@ class StatisticsRepositoryImpl(
     override suspend fun getGameHistory(uid: String): DataResult<List<GameHistory>> {
         return try {
             val gamesAsPlayer1 = firestore.collection("games")
-                .whereEqualTo("player1", uid)
+                .whereEqualTo("player1Id", uid)
                 .whereIn("status", listOf("finished", "draw"))
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .limit(25)
                 .get().await()
 
             val gamesAsPlayer2 = firestore.collection("games")
-                .whereEqualTo("player2", uid)
+                .whereEqualTo("player2Id", uid)
                 .whereIn("status", listOf("finished", "draw"))
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .limit(25)
@@ -45,7 +45,7 @@ class StatisticsRepositoryImpl(
 
             val gameHistories = allGames.mapNotNull { doc ->
                 val data = doc.data ?: return@mapNotNull null
-                val isPlayer1 = data["player1"] as? String == uid
+                val isPlayer1 = data["player1Id"] as? String == uid
                 val status = data["status"] as? String ?: ""
                 val winner = data["winner"] as? String ?: ""
 
@@ -55,7 +55,7 @@ class StatisticsRepositoryImpl(
                     else -> GameResultStats.LOSS
                 }
 
-                val opponentId = if (isPlayer1) data["player2"] as? String else data["player1"] as? String
+                val opponentId = if (isPlayer1) data["player2Id"] as? String else data["player1Id   "] as? String
                 // In a real app, you might fetch opponent details here or pass the ID
                 val opponentName = "Opponent" // Placeholder
                 val opponentRating = 1200 // Placeholder

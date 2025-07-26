@@ -157,7 +157,7 @@ private fun ProfileContent(uiState: StatisticsUiState, navController: NavControl
 @Composable
 private fun ProfileHeader(uiState: StatisticsUiState) {
     // In a real app, get user name from a UserViewModel or similar
-    val userName = "Player"
+    val userName = uiState.userData?.displayName ?: "Player"
 
     Card(
         modifier = Modifier.fillMaxWidth(),

@@ -1081,11 +1081,11 @@ private fun SpecialFeaturesSection(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             FeatureCard(
-                title = "Practice",
-                subtitle = "Sharpen Skills",
+                title = "2 Player Offline",
+                subtitle = "Pass and Play",
                 icon = Icons.Default.School,
                 color = Color(0xFF9C27B0),
-                onClick = { navController.navigate("game/practice/0") },
+                onClick = { navController.navigate("game/offline_game/0") }, // Use the new ID
                 modifier = Modifier.weight(1f)
             )
             FeatureCard(

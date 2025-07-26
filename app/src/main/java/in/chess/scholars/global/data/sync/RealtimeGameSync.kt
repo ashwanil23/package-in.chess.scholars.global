@@ -235,8 +235,8 @@ class RealtimeGameSync(
                     } else null
                 },
                 status = status,
-                createdAt = document.getLong("createdAt") ?: 0L,
-                endedAt = document.getLong("endedAt")
+                createdAt = document.getTimestamp("createdAt"),
+                endedAt = document.getTimestamp("endedAt")
             )
 
             cacheManager.cacheGameState(gameState)
