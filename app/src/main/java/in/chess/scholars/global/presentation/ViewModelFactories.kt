@@ -115,7 +115,9 @@ class GameViewModelFactory(private val container: DIContainer) : ViewModelProvid
                 updateGameUseCase = container.updateGameUseCase,
                 endGameUseCase = container.endGameUseCase,
                 getUserDataUseCase = container.getUserDataUseCase,
-                getCurrentUserIdUseCase = container.getCurrentUserIdUseCase
+                getCurrentUserIdUseCase = container.getCurrentUserIdUseCase,
+                getChatStreamUseCase = container.getChatStreamUseCase,
+                sendMessageUseCase = container.sendMessageUseCase
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

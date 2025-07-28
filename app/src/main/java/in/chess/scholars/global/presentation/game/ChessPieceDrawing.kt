@@ -1,474 +1,5 @@
 package `in`.chess.scholars.global.presentation.game
 
-//
-///**
-// * Draws a custom Rook chess piece.
-// */
-//fun DrawScope.drawRook(color: Color, outlineColor: Color) {
-//    val strokeWidth = size.minDimension * 0.05f
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//        moveTo(w * 0.2f, h * 0.9f)
-//        lineTo(w * 0.8f, h * 0.9f)
-//        lineTo(w * 0.8f, h * 0.8f)
-//        lineTo(w * 0.7f, h * 0.8f)
-//        lineTo(w * 0.7f, h * 0.35f)
-//        lineTo(w * 0.8f, h * 0.25f)
-//        lineTo(w * 0.8f, h * 0.1f)
-//        lineTo(w * 0.65f, h * 0.1f)
-//        lineTo(w * 0.65f, h * 0.2f)
-//        lineTo(w * 0.55f, h * 0.2f)
-//        lineTo(w * 0.55f, h * 0.1f)
-//        lineTo(w * 0.45f, h * 0.1f)
-//        lineTo(w * 0.45f, h * 0.2f)
-//        lineTo(w * 0.35f, h * 0.2f)
-//        lineTo(w * 0.35f, h * 0.1f)
-//        lineTo(w * 0.2f, h * 0.1f)
-//        lineTo(w * 0.2f, h * 0.25f)
-//        lineTo(w * 0.3f, h * 0.35f)
-//        lineTo(w * 0.3f, h * 0.8f)
-//        lineTo(w * 0.2f, h * 0.8f)
-//        close()
-//    }
-//    drawPath(path, color)
-//    drawPath(path, outlineColor, style = Stroke(width = strokeWidth))
-//}
-//
-///**
-// * Draws a custom Bishop chess piece.
-// */
-//fun DrawScope.drawBishop(color: Color, outlineColor: Color) {
-//    val strokeWidth = size.minDimension * 0.05f
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//        moveTo(w * 0.5f, h * 0.1f) // Top point
-//        quadraticBezierTo(w * 0.8f, h * 0.4f, w * 0.7f, h * 0.8f)
-//        lineTo(w * 0.75f, h * 0.9f)
-//        lineTo(w * 0.25f, h * 0.9f)
-//        lineTo(w * 0.3f, h * 0.8f)
-//        quadraticBezierTo(w * 0.2f, h * 0.4f, w * 0.5f, h * 0.1f)
-//        close()
-//    }
-//    drawPath(path, color)
-//    drawPath(path, outlineColor, style = Stroke(width = strokeWidth))
-//
-//    // Mitre cleft
-//    drawLine(
-//        color = outlineColor,
-//        start = Offset(size.width * 0.5f, size.height * 0.15f),
-//        end = Offset(size.width * 0.5f, size.height * 0.3f),
-//        strokeWidth = strokeWidth / 2
-//    )
-//}
-//
-///**
-// * Draws a custom Knight chess piece.
-// */
-//fun DrawScope.drawKnight(color: Color, outlineColor: Color) {
-//    val strokeWidth = size.minDimension * 0.05f
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//        moveTo(w * 0.2f, h * 0.9f)
-//        lineTo(w * 0.8f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.7f)
-//        cubicTo(w * 0.8f, h * 0.5f, w * 0.6f, h * 0.5f, w * 0.55f, h * 0.4f)
-//        lineTo(w * 0.75f, h * 0.2f)
-//        quadraticBezierTo(w * 0.8f, h * 0.1f, w * 0.7f, h * 0.1f)
-//        quadraticBezierTo(w * 0.6f, h * 0.15f, w * 0.5f, h * 0.25f)
-//        lineTo(w * 0.4f, h * 0.15f)
-//        lineTo(w * 0.3f, h * 0.3f)
-//        lineTo(w * 0.25f, h * 0.2f)
-//        lineTo(w * 0.2f, h * 0.4f)
-//        cubicTo(w * 0.3f, h * 0.6f, w * 0.2f, h * 0.7f, w * 0.25f, h * 0.7f)
-//        close()
-//    }
-//    drawPath(path, color)
-//    drawPath(path, outlineColor, style = Stroke(width = strokeWidth))
-//}
-//
-///**
-// * Draws a custom King chess piece.
-// */
-//fun DrawScope.drawKing(color: Color, outlineColor: Color) {
-//    val strokeWidth = size.minDimension * 0.05f
-//    val w = size.width
-//    val h = size.height
-//
-//    val path = Path().apply {
-//        moveTo(w * 0.25f, h * 0.95f)
-//        lineTo(w * 0.75f, h * 0.95f)
-//        lineTo(w * 0.7f, h * 0.85f)
-//        quadraticBezierTo(w * 0.5f, h * 0.75f, w * 0.6f, h * 0.5f)
-//        lineTo(w * 0.6f, h * 0.45f)
-//        lineTo(w * 0.4f, h * 0.45f)
-//        lineTo(w * 0.4f, h * 0.5f)
-//        quadraticBezierTo(w * 0.5f, h * 0.75f, w * 0.3f, h * 0.85f)
-//        close()
-//    }
-//    drawPath(path, color)
-//    drawPath(path, outlineColor, style = Stroke(width = strokeWidth))
-//
-//    val crownPath = Path().apply {
-//        moveTo(w * 0.4f, h * 0.45f)
-//        lineTo(w * 0.3f, h * 0.2f)
-//        lineTo(w * 0.5f, h * 0.3f)
-//        lineTo(w * 0.7f, h * 0.2f)
-//        lineTo(w * 0.6f, h * 0.45f)
-//        close()
-//    }
-//    drawPath(crownPath, color)
-//    drawPath(crownPath, outlineColor, style = Stroke(width = strokeWidth))
-//
-//    // Cross on top
-//    drawLine(outlineColor, Offset(w * 0.5f, h * 0.05f), Offset(w * 0.5f, h * 0.2f), strokeWidth)
-//    drawLine(outlineColor, Offset(w * 0.4f, h * 0.12f), Offset(w * 0.6f, h * 0.12f), strokeWidth)
-//}
-//
-///**
-// * Draws a custom Queen chess piece.
-// */
-//fun DrawScope.drawQueen(color: Color, outlineColor: Color) {
-//    val strokeWidth = size.minDimension * 0.05f
-//    val w = size.width
-//    val h = size.height
-//
-//    val path = Path().apply {
-//        moveTo(w * 0.2f, h * 0.9f)
-//        lineTo(w * 0.8f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.8f)
-//        cubicTo(w * 0.9f, h * 0.6f, w * 0.6f, h * 0.5f, w * 0.6f, h * 0.4f)
-//        lineTo(w * 0.4f, h * 0.4f)
-//        cubicTo(w * 0.4f, h * 0.5f, w * 0.1f, h * 0.6f, w * 0.25f, h * 0.8f)
-//        close()
-//    }
-//    drawPath(path, color)
-//    drawPath(path, outlineColor, style = Stroke(width = strokeWidth))
-//
-//    val crownPath = Path().apply {
-//        moveTo(w * 0.4f, h * 0.4f)
-//        lineTo(w * 0.3f, h * 0.2f)
-//        lineTo(w * 0.4f, h * 0.3f)
-//        lineTo(w * 0.5f, h * 0.15f)
-//        lineTo(w * 0.6f, h * 0.3f)
-//        lineTo(w * 0.7f, h * 0.2f)
-//        lineTo(w * 0.6f, h * 0.4f)
-//        close()
-//    }
-//    drawPath(crownPath, color)
-//    drawPath(crownPath, outlineColor, style = Stroke(width = strokeWidth))
-//}
-//
-///**
-// * Draws a custom Pawn chess piece.
-// */
-//fun DrawScope.drawPawn(color: Color, outlineColor: Color) {
-//    val strokeWidth = size.minDimension * 0.05f
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//        moveTo(w * 0.25f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.9f)
-//        lineTo(w * 0.7f, h * 0.8f)
-//        lineTo(w * 0.65f, h * 0.6f)
-//        lineTo(w * 0.35f, h * 0.6f)
-//        lineTo(w * 0.3f, h * 0.8f)
-//        close()
-//    }
-//    drawPath(path, color)
-//    drawPath(path, outlineColor, style = Stroke(width = strokeWidth))
-//
-//    drawCircle(
-//        color = color,
-//        radius = size.minDimension * 0.2f,
-//        center = Offset(center.x, size.height * 0.4f)
-//    )
-//    drawCircle(
-//        color = outlineColor,
-//        radius = size.minDimension * 0.2f,
-//        center = Offset(center.x, size.height * 0.4f),
-//        style = Stroke(width = strokeWidth)
-//    )
-//}
-
-
-
-
-
-
-
-
-
-
-
-//fun DrawScope.drawPawn(brush: Brush, outlineColor: Color) {
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//
-//        // Base
-//        moveTo(w * 0.3f, h * 0.9f)
-//        lineTo(w * 0.7f, h * 0.9f)
-//        lineTo(w * 0.65f, h * 0.75f)
-//        lineTo(w * 0.6f, h * 0.6f)
-//        lineTo(w * 0.4f, h * 0.6f)
-//        lineTo(w * 0.35f, h * 0.75f)
-//        close()
-//
-//        // Head
-//        moveTo(w * 0.5f, h * 0.15f)
-//        cubicTo(
-//            w * 0.7f, h * 0.15f,
-//            w * 0.75f, h * 0.35f,
-//            w * 0.6f, h * 0.45f
-//        )
-//        lineTo(w * 0.4f, h * 0.45f)
-//        cubicTo(
-//            w * 0.25f, h * 0.35f,
-//            w * 0.3f, h * 0.15f,
-//            w * 0.5f, h * 0.15f
-//        )
-//    }
-//
-//    drawPath(path, brush)
-//    drawPath(path, outlineColor, style = Stroke(width = size.minDimension * 0.03f))
-//}
-//
-//fun DrawScope.drawRook(brush: Brush, outlineColor: Color) {
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//
-//        // Base
-//        moveTo(w * 0.25f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.9f)
-//        lineTo(w * 0.7f, h * 0.8f)
-//        lineTo(w * 0.65f, h * 0.75f)
-//        lineTo(w * 0.65f, h * 0.35f)
-//        lineTo(w * 0.35f, h * 0.35f)
-//        lineTo(w * 0.35f, h * 0.75f)
-//        lineTo(w * 0.3f, h * 0.8f)
-//        close()
-//
-//        // Battlements
-//        moveTo(w * 0.35f, h * 0.35f)
-//        lineTo(w * 0.35f, h * 0.15f)
-//        lineTo(w * 0.25f, h * 0.15f)
-//        lineTo(w * 0.25f, h * 0.25f)
-//        lineTo(w * 0.35f, h * 0.25f)
-//
-//        moveTo(w * 0.45f, h * 0.25f)
-//        lineTo(w * 0.45f, h * 0.15f)
-//        lineTo(w * 0.55f, h * 0.15f)
-//        lineTo(w * 0.55f, h * 0.25f)
-//
-//        moveTo(w * 0.65f, h * 0.25f)
-//        lineTo(w * 0.75f, h * 0.25f)
-//        lineTo(w * 0.75f, h * 0.15f)
-//        lineTo(w * 0.65f, h * 0.15f)
-//        lineTo(w * 0.65f, h * 0.35f)
-//    }
-//
-//    drawPath(path, brush)
-//    drawPath(path, outlineColor, style = Stroke(width = size.minDimension * 0.03f))
-//}
-//
-//fun DrawScope.drawKnight(brush: Brush, outlineColor: Color) {
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//
-//        moveTo(w * 0.25f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.9f)
-//        lineTo(w * 0.7f, h * 0.75f)
-//        cubicTo(
-//            w * 0.75f, h * 0.55f,
-//            w * 0.65f, h * 0.45f,
-//            w * 0.6f, h * 0.4f
-//        )
-//        lineTo(w * 0.75f, h * 0.25f)
-//        cubicTo(
-//            w * 0.8f, h * 0.15f,
-//            w * 0.7f, h * 0.1f,
-//            w * 0.6f, h * 0.15f
-//        )
-//        cubicTo(
-//            w * 0.5f, h * 0.2f,
-//            w * 0.45f, h * 0.25f,
-//            w * 0.4f, h * 0.3f
-//        )
-//        lineTo(w * 0.35f, h * 0.25f)
-//        lineTo(w * 0.3f, h * 0.35f)
-//        lineTo(w * 0.25f, h * 0.3f)
-//        lineTo(w * 0.2f, h * 0.45f)
-//        cubicTo(
-//            w * 0.25f, h * 0.6f,
-//            w * 0.25f, h * 0.75f,
-//            w * 0.3f, h * 0.75f
-//        )
-//        close()
-//    }
-//
-//    drawPath(path, brush)
-//    drawPath(path, outlineColor, style = Stroke(width = size.minDimension * 0.03f))
-//
-//    // Eye
-//    drawCircle(
-//        color = outlineColor,
-//        radius = size.minDimension * 0.03f,
-//        center = Offset(size.width * 0.45f, size.height * 0.35f)
-//    )
-//}
-//
-//fun DrawScope.drawBishop(brush: Brush, outlineColor: Color) {
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//
-//        // Base
-//        moveTo(w * 0.25f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.9f)
-//        lineTo(w * 0.7f, h * 0.8f)
-//
-//        // Body
-//        cubicTo(
-//            w * 0.75f, h * 0.6f,
-//            w * 0.65f, h * 0.4f,
-//            w * 0.55f, h * 0.25f
-//        )
-//
-//        // Top
-//        lineTo(w * 0.55f, h * 0.15f)
-//        cubicTo(
-//            w * 0.55f, h * 0.1f,
-//            w * 0.45f, h * 0.1f,
-//            w * 0.45f, h * 0.15f
-//        )
-//        lineTo(w * 0.45f, h * 0.25f)
-//
-//        cubicTo(
-//            w * 0.35f, h * 0.4f,
-//            w * 0.25f, h * 0.6f,
-//            w * 0.3f, h * 0.8f
-//        )
-//        close()
-//    }
-//
-//    drawPath(path, brush)
-//    drawPath(path, outlineColor, style = Stroke(width = size.minDimension * 0.03f))
-//
-//    // Mitre slit
-//    drawLine(
-//        color = outlineColor,
-//        start = Offset(size.width * 0.5f, size.height * 0.2f),
-//        end = Offset(size.width * 0.5f, size.height * 0.35f),
-//        strokeWidth = size.minDimension * 0.02f
-//    )
-//}
-//
-//fun DrawScope.drawQueen(brush: Brush, outlineColor: Color) {
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//
-//        // Base
-//        moveTo(w * 0.2f, h * 0.9f)
-//        lineTo(w * 0.8f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.8f)
-//
-//        // Body
-//        cubicTo(
-//            w * 0.85f, h * 0.6f,
-//            w * 0.7f, h * 0.45f,
-//            w * 0.65f, h * 0.4f
-//        )
-//
-//        // Crown points
-//        lineTo(w * 0.7f, h * 0.2f)
-//        lineTo(w * 0.6f, h * 0.3f)
-//        lineTo(w * 0.5f, h * 0.15f)
-//        lineTo(w * 0.4f, h * 0.3f)
-//        lineTo(w * 0.3f, h * 0.2f)
-//
-//        lineTo(w * 0.35f, h * 0.4f)
-//        cubicTo(
-//            w * 0.3f, h * 0.45f,
-//            w * 0.15f, h * 0.6f,
-//            w * 0.25f, h * 0.8f
-//        )
-//        close()
-//    }
-//
-//    drawPath(path, brush)
-//    drawPath(path, outlineColor, style = Stroke(width = size.minDimension * 0.03f))
-//
-//    // Crown jewels
-//    val jewelPositions = listOf(0.3f, 0.5f, 0.7f)
-//    jewelPositions.forEach { x ->
-//        drawCircle(
-//            color = Color(0xFFFF5252),
-//            radius = size.minDimension * 0.02f,
-//            center = Offset(size.width * x, size.height * 0.25f)
-//        )
-//    }
-//}
-//
-//fun DrawScope.drawKing(brush: Brush, outlineColor: Color) {
-//    val path = Path().apply {
-//        val w = size.width
-//        val h = size.height
-//
-//        // Base
-//        moveTo(w * 0.25f, h * 0.9f)
-//        lineTo(w * 0.75f, h * 0.9f)
-//        lineTo(w * 0.7f, h * 0.85f)
-//
-//        // Body
-//        cubicTo(
-//            w * 0.65f, h * 0.7f,
-//            w * 0.6f, h * 0.55f,
-//            w * 0.6f, h * 0.45f
-//        )
-//
-//        // Crown
-//        lineTo(w * 0.65f, h * 0.35f)
-//        lineTo(w * 0.6f, h * 0.25f)
-//        lineTo(w * 0.55f, h * 0.3f)
-//        lineTo(w * 0.5f, h * 0.2f)
-//        lineTo(w * 0.45f, h * 0.3f)
-//        lineTo(w * 0.4f, h * 0.25f)
-//        lineTo(w * 0.35f, h * 0.35f)
-//        lineTo(w * 0.4f, h * 0.45f)
-//
-//        cubicTo(
-//            w * 0.4f, h * 0.55f,
-//            w * 0.35f, h * 0.7f,
-//            w * 0.3f, h * 0.85f
-//        )
-//        close()
-//    }
-//
-//    drawPath(path, brush)
-//    drawPath(path, outlineColor, style = Stroke(width = size.minDimension * 0.03f))
-//
-//    // Cross
-//    drawLine(
-//        color = outlineColor,
-//        start = Offset(size.width * 0.5f, size.height * 0.1f),
-//        end = Offset(size.width * 0.5f, size.height * 0.2f),
-//        strokeWidth = size.minDimension * 0.03f
-//    )
-//    drawLine(
-//        color = outlineColor,
-//        start = Offset(size.width * 0.45f, size.height * 0.15f),
-//        end = Offset(size.width * 0.55f, size.height * 0.15f),
-//        strokeWidth = size.minDimension * 0.03f
-//    )
-//}
-
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -487,43 +18,66 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.SentimentVeryDissatisfied
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -538,6 +92,13 @@ import `in`.chess.scholars.global.domain.model.GameResult
 import `in`.chess.scholars.global.domain.model.PieceColor
 import `in`.chess.scholars.global.domain.model.PieceType
 import androidx.compose.ui.geometry.minDimension
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import `in`.chess.scholars.global.domain.model.ChatMessage
+import `in`.chess.scholars.global.domain.model.ChessPiece
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * Enhanced chess piece drawing with proper path handling and premium aesthetics
@@ -559,438 +120,186 @@ fun DrawScope.drawChessPiece(
     )
 
     when (pieceType) {
-        PieceType.PAWN -> drawPawn(color, outlineColor, size)
-        PieceType.ROOK -> drawRook(color, outlineColor, size)
-        PieceType.KNIGHT -> drawKnight(color, outlineColor, size)
-        PieceType.BISHOP -> drawBishop(color, outlineColor, size)
-        PieceType.QUEEN -> drawQueen(color, outlineColor, size)
-        PieceType.KING -> drawKing(color, outlineColor, size)
+        PieceType.PAWN -> drawPawn(color, outlineColor)
+        PieceType.ROOK -> drawRook(color, outlineColor)
+        PieceType.KNIGHT -> drawKnight(color, outlineColor)
+        PieceType.BISHOP -> drawBishop(color, outlineColor)
+        PieceType.QUEEN -> drawQueen(color, outlineColor)
+        PieceType.KING -> drawKing(color, outlineColor)
     }
 }
 
-private fun DrawScope.drawPawn(fillColor: Color, strokeColor: Color, pieceSize: Float) {
-    val scale = pieceSize / 100f
-    val centerX = center.x
-    val centerY = center.y
+private fun DrawScope.drawPawn(fillColor: Color, strokeColor: Color) {
+    val w = size.width
+    val h = size.height
+    val strokeWidth = w * 0.05f
 
-    drawIntoCanvas { canvas ->
-        val paint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Fill
-            color = fillColor
-        }
+    val path = Path().apply {
+        moveTo(w * 0.3f, h * 0.9f)
+        lineTo(w * 0.7f, h * 0.9f)
+        arcTo(Rect(w * 0.2f, h * 0.8f, w * 0.8f, h * 1.0f), 0f, 180f, false)
+        close()
 
-        val strokePaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 2f * scale
-            color = strokeColor
-        }
-
-        val path = Path().apply {
-            // Base
-            moveTo(centerX - 25f * scale, centerY + 40f * scale)
-            lineTo(centerX + 25f * scale, centerY + 40f * scale)
-            lineTo(centerX + 20f * scale, centerY + 30f * scale)
-            lineTo(centerX + 15f * scale, centerY + 20f * scale)
-
-            // Neck
-            lineTo(centerX + 10f * scale, centerY + 5f * scale)
-            cubicTo(
-                centerX + 12f * scale, centerY - 5f * scale,
-                centerX + 12f * scale, centerY - 10f * scale,
-                centerX + 8f * scale, centerY - 15f * scale
-            )
-
-            // Head
-            cubicTo(
-                centerX + 15f * scale, centerY - 20f * scale,
-                centerX + 15f * scale, centerY - 30f * scale,
-                centerX, centerY - 35f * scale
-            )
-            cubicTo(
-                centerX - 15f * scale, centerY - 30f * scale,
-                centerX - 15f * scale, centerY - 20f * scale,
-                centerX - 8f * scale, centerY - 15f * scale
-            )
-
-            // Other side neck
-            cubicTo(
-                centerX - 12f * scale, centerY - 10f * scale,
-                centerX - 12f * scale, centerY - 5f * scale,
-                centerX - 10f * scale, centerY + 5f * scale
-            )
-
-            // Other side base
-            lineTo(centerX - 15f * scale, centerY + 20f * scale)
-            lineTo(centerX - 20f * scale, centerY + 30f * scale)
-            close()
-        }
-
-        canvas.drawPath(path, paint)
-        canvas.drawPath(path, strokePaint)
+        moveTo(w * 0.4f, h * 0.8f)
+        lineTo(w * 0.4f, h * 0.6f)
+        lineTo(w * 0.6f, h * 0.6f)
+        lineTo(w * 0.6f, h * 0.8f)
+        close()
     }
+
+    drawPath(path, fillColor)
+    drawPath(path, strokeColor, style = Stroke(strokeWidth))
+
+    drawCircle(fillColor, w * 0.2f, center = Offset(w * 0.5f, h * 0.4f))
+    drawCircle(strokeColor, w * 0.2f, center = Offset(w * 0.5f, h * 0.4f), style = Stroke(strokeWidth))
 }
 
-private fun DrawScope.drawRook(fillColor: Color, strokeColor: Color, pieceSize: Float) {
-    val scale = pieceSize / 100f
-    val centerX = center.x
-    val centerY = center.y
+private fun DrawScope.drawRook(fillColor: Color, strokeColor: Color) {
+    val w = size.width
+    val h = size.height
+    val strokeWidth = w * 0.05f
 
-    drawIntoCanvas { canvas ->
-        val paint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Fill
-            color = fillColor
-        }
-
-        val strokePaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 2f * scale
-            color = strokeColor
-        }
-
-        val path = Path().apply {
-            // Base
-            moveTo(centerX - 30f * scale, centerY + 40f * scale)
-            lineTo(centerX + 30f * scale, centerY + 40f * scale)
-            lineTo(centerX + 25f * scale, centerY + 30f * scale)
-            lineTo(centerX + 20f * scale, centerY + 20f * scale)
-
-            // Tower body
-            lineTo(centerX + 20f * scale, centerY - 10f * scale)
-
-            // Battlements
-            lineTo(centerX + 20f * scale, centerY - 25f * scale)
-            lineTo(centerX + 12f * scale, centerY - 25f * scale)
-            lineTo(centerX + 12f * scale, centerY - 15f * scale)
-            lineTo(centerX + 6f * scale, centerY - 15f * scale)
-            lineTo(centerX + 6f * scale, centerY - 25f * scale)
-            lineTo(centerX - 6f * scale, centerY - 25f * scale)
-            lineTo(centerX - 6f * scale, centerY - 15f * scale)
-            lineTo(centerX - 12f * scale, centerY - 15f * scale)
-            lineTo(centerX - 12f * scale, centerY - 25f * scale)
-            lineTo(centerX - 20f * scale, centerY - 25f * scale)
-
-            // Other side
-            lineTo(centerX - 20f * scale, centerY - 10f * scale)
-            lineTo(centerX - 20f * scale, centerY + 20f * scale)
-            lineTo(centerX - 25f * scale, centerY + 30f * scale)
-            close()
-        }
-
-        canvas.drawPath(path, paint)
-        canvas.drawPath(path, strokePaint)
+    val path = Path().apply {
+        moveTo(w * 0.2f, h * 0.9f)
+        lineTo(w * 0.8f, h * 0.9f)
+        lineTo(w * 0.8f, h * 0.8f)
+        lineTo(w * 0.7f, h * 0.8f)
+        lineTo(w * 0.7f, h * 0.35f)
+        lineTo(w * 0.8f, h * 0.25f)
+        lineTo(w * 0.8f, h * 0.1f)
+        lineTo(w * 0.65f, h * 0.1f)
+        lineTo(w * 0.65f, h * 0.2f)
+        lineTo(w * 0.55f, h * 0.2f)
+        lineTo(w * 0.55f, h * 0.1f)
+        lineTo(w * 0.45f, h * 0.1f)
+        lineTo(w * 0.45f, h * 0.2f)
+        lineTo(w * 0.35f, h * 0.2f)
+        lineTo(w * 0.35f, h * 0.1f)
+        lineTo(w * 0.2f, h * 0.1f)
+        lineTo(w * 0.2f, h * 0.25f)
+        lineTo(w * 0.3f, h * 0.35f)
+        lineTo(w * 0.3f, h * 0.8f)
+        lineTo(w * 0.2f, h * 0.8f)
+        close()
     }
+    drawPath(path, fillColor)
+    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
 }
 
-private fun DrawScope.drawKnight(fillColor: Color, strokeColor: Color, pieceSize: Float) {
-    val scale = pieceSize / 100f
-    val centerX = center.x
-    val centerY = center.y
+private fun DrawScope.drawKnight(fillColor: Color, strokeColor: Color) {
+    val w = size.width
+    val h = size.height
+    val strokeWidth = w * 0.05f
 
-    drawIntoCanvas { canvas ->
-        val paint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Fill
-            color = fillColor
-        }
-
-        val strokePaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 2f * scale
-            color = strokeColor
-        }
-
-        val path = Path().apply {
-            // Base
-            moveTo(centerX - 25f * scale, centerY + 40f * scale)
-            lineTo(centerX + 25f * scale, centerY + 40f * scale)
-            lineTo(centerX + 20f * scale, centerY + 30f * scale)
-
-            // Body curve
-            cubicTo(
-                centerX + 15f * scale, centerY + 20f * scale,
-                centerX + 15f * scale, centerY + 10f * scale,
-                centerX + 20f * scale, centerY
-            )
-
-            // Neck and head
-            cubicTo(
-                centerX + 25f * scale, centerY - 15f * scale,
-                centerX + 20f * scale, centerY - 25f * scale,
-                centerX + 10f * scale, centerY - 30f * scale
-            )
-
-            // Ears
-            lineTo(centerX + 8f * scale, centerY - 35f * scale)
-            lineTo(centerX + 3f * scale, centerY - 30f * scale)
-            lineTo(centerX, centerY - 35f * scale)
-            lineTo(centerX - 5f * scale, centerY - 28f * scale)
-
-            // Face
-            cubicTo(
-                centerX - 10f * scale, centerY - 20f * scale,
-                centerX - 15f * scale, centerY - 10f * scale,
-                centerX - 15f * scale, centerY
-            )
-
-            // Chest
-            cubicTo(
-                centerX - 20f * scale, centerY + 5f * scale,
-                centerX - 22f * scale, centerY + 15f * scale,
-                centerX - 20f * scale, centerY + 30f * scale
-            )
-
-            close()
-        }
-
-        canvas.drawPath(path, paint)
-        canvas.drawPath(path, strokePaint)
-
-        // Eye
-        canvas.drawCircle(
-            Offset(centerX - 5f * scale, centerY - 15f * scale),
-            2f * scale,
-            Paint().apply {
-                color = strokeColor
-                isAntiAlias = true
-            }
-        )
+    val path = Path().apply {
+        moveTo(w * 0.2f, h * 0.9f)
+        lineTo(w * 0.8f, h * 0.9f)
+        lineTo(w * 0.75f, h * 0.7f)
+        cubicTo(w * 0.8f, h * 0.5f, w * 0.6f, h * 0.5f, w * 0.55f, h * 0.4f)
+        lineTo(w * 0.75f, h * 0.2f)
+        quadraticBezierTo(w * 0.8f, h * 0.1f, w * 0.7f, h * 0.1f)
+        quadraticBezierTo(w * 0.6f, h * 0.15f, w * 0.5f, h * 0.25f)
+        lineTo(w * 0.4f, h * 0.15f)
+        lineTo(w * 0.3f, h * 0.3f)
+        lineTo(w * 0.25f, h * 0.2f)
+        lineTo(w * 0.2f, h * 0.4f)
+        cubicTo(w * 0.3f, h * 0.6f, w * 0.2f, h * 0.7f, w * 0.25f, h * 0.7f)
+        close()
     }
+    drawPath(path, fillColor)
+    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
 }
 
-private fun DrawScope.drawBishop(fillColor: Color, strokeColor: Color, pieceSize: Float) {
-    val scale = pieceSize / 100f
-    val centerX = center.x
-    val centerY = center.y
+private fun DrawScope.drawBishop(fillColor: Color, strokeColor: Color) {
+    val w = size.width
+    val h = size.height
+    val strokeWidth = w * 0.05f
 
-    drawIntoCanvas { canvas ->
-        val paint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Fill
-            color = fillColor
-        }
-
-        val strokePaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 2f * scale
-            color = strokeColor
-        }
-
-        val path = Path().apply {
-            // Base
-            moveTo(centerX - 25f * scale, centerY + 40f * scale)
-            lineTo(centerX + 25f * scale, centerY + 40f * scale)
-            lineTo(centerX + 20f * scale, centerY + 30f * scale)
-
-            // Body
-            cubicTo(
-                centerX + 18f * scale, centerY + 20f * scale,
-                centerX + 15f * scale, centerY,
-                centerX + 10f * scale, centerY - 15f * scale
-            )
-
-            // Hat
-            cubicTo(
-                centerX + 8f * scale, centerY - 20f * scale,
-                centerX + 5f * scale, centerY - 25f * scale,
-                centerX, centerY - 30f * scale
-            )
-
-            // Top knob
-            cubicTo(
-                centerX - 2f * scale, centerY - 32f * scale,
-                centerX - 2f * scale, centerY - 35f * scale,
-                centerX, centerY - 37f * scale
-            )
-            cubicTo(
-                centerX + 2f * scale, centerY - 35f * scale,
-                centerX + 2f * scale, centerY - 32f * scale,
-                centerX, centerY - 30f * scale
-            )
-
-            // Other side
-            cubicTo(
-                centerX - 5f * scale, centerY - 25f * scale,
-                centerX - 8f * scale, centerY - 20f * scale,
-                centerX - 10f * scale, centerY - 15f * scale
-            )
-            cubicTo(
-                centerX - 15f * scale, centerY,
-                centerX - 18f * scale, centerY + 20f * scale,
-                centerX - 20f * scale, centerY + 30f * scale
-            )
-
-            close()
-        }
-
-        canvas.drawPath(path, paint)
-        canvas.drawPath(path, strokePaint)
-
-        // Mitre slit
-        canvas.drawLine(
-            Offset(centerX, centerY - 25f * scale),
-            Offset(centerX, centerY - 10f * scale),
-            strokePaint
-        )
+    val path = Path().apply {
+        moveTo(w * 0.5f, h * 0.1f) // Top point
+        quadraticBezierTo(w * 0.8f, h * 0.4f, w * 0.7f, h * 0.8f)
+        lineTo(w * 0.75f, h * 0.9f)
+        lineTo(w * 0.25f, h * 0.9f)
+        lineTo(w * 0.3f, h * 0.8f)
+        quadraticBezierTo(w * 0.2f, h * 0.4f, w * 0.5f, h * 0.1f)
+        close()
     }
+    drawPath(path, fillColor)
+    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+
+    // Mitre cleft
+    drawLine(
+        color = strokeColor,
+        start = Offset(w * 0.5f, h * 0.15f),
+        end = Offset(w * 0.5f, h * 0.3f),
+        strokeWidth = strokeWidth / 2
+    )
 }
 
-private fun DrawScope.drawQueen(fillColor: Color, strokeColor: Color, pieceSize: Float) {
-    val scale = pieceSize / 100f
-    val centerX = center.x
-    val centerY = center.y
+private fun DrawScope.drawQueen(fillColor: Color, strokeColor: Color) {
+    val w = size.width
+    val h = size.height
+    val strokeWidth = w * 0.05f
 
-    drawIntoCanvas { canvas ->
-        val paint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Fill
-            color = fillColor
-        }
-
-        val strokePaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 2f * scale
-            color = strokeColor
-        }
-
-        val path = Path().apply {
-            // Base
-            moveTo(centerX - 30f * scale, centerY + 40f * scale)
-            lineTo(centerX + 30f * scale, centerY + 40f * scale)
-            lineTo(centerX + 25f * scale, centerY + 30f * scale)
-
-            // Body
-            cubicTo(
-                centerX + 22f * scale, centerY + 15f * scale,
-                centerX + 20f * scale, centerY,
-                centerX + 15f * scale, centerY - 10f * scale
-            )
-
-            // Crown points
-            lineTo(centerX + 20f * scale, centerY - 25f * scale)
-            lineTo(centerX + 12f * scale, centerY - 20f * scale)
-            lineTo(centerX + 10f * scale, centerY - 30f * scale)
-            lineTo(centerX + 5f * scale, centerY - 20f * scale)
-            lineTo(centerX, centerY - 35f * scale)
-            lineTo(centerX - 5f * scale, centerY - 20f * scale)
-            lineTo(centerX - 10f * scale, centerY - 30f * scale)
-            lineTo(centerX - 12f * scale, centerY - 20f * scale)
-            lineTo(centerX - 20f * scale, centerY - 25f * scale)
-
-            // Other side
-            lineTo(centerX - 15f * scale, centerY - 10f * scale)
-            cubicTo(
-                centerX - 20f * scale, centerY,
-                centerX - 22f * scale, centerY + 15f * scale,
-                centerX - 25f * scale, centerY + 30f * scale
-            )
-
-            close()
-        }
-
-        canvas.drawPath(path, paint)
-        canvas.drawPath(path, strokePaint)
-
-        // Crown jewels
-        val jewelPositions = listOf(-10f, 0f, 10f)
-        jewelPositions.forEach { offset ->
-            canvas.drawCircle(
-                Offset(centerX + offset * scale, centerY - 27f * scale),
-                2f * scale,
-                Paint().apply {
-                    color = Color(0xFFFF5252)
-                    isAntiAlias = true
-                }
-            )
-        }
+    val path = Path().apply {
+        moveTo(w * 0.2f, h * 0.9f)
+        lineTo(w * 0.8f, h * 0.9f)
+        lineTo(w * 0.75f, h * 0.8f)
+        cubicTo(w * 0.9f, h * 0.6f, w * 0.6f, h * 0.5f, w * 0.6f, h * 0.4f)
+        lineTo(w * 0.4f, h * 0.4f)
+        cubicTo(w * 0.4f, h * 0.5f, w * 0.1f, h * 0.6f, w * 0.25f, h * 0.8f)
+        close()
     }
+    drawPath(path, fillColor)
+    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+
+    val crownPath = Path().apply {
+        moveTo(w * 0.4f, h * 0.4f)
+        lineTo(w * 0.3f, h * 0.2f)
+        lineTo(w * 0.4f, h * 0.3f)
+        lineTo(w * 0.5f, h * 0.15f)
+        lineTo(w * 0.6f, h * 0.3f)
+        lineTo(w * 0.7f, h * 0.2f)
+        lineTo(w * 0.6f, h * 0.4f)
+        close()
+    }
+    drawPath(crownPath, fillColor)
+    drawPath(crownPath, strokeColor, style = Stroke(width = strokeWidth))
 }
 
-private fun DrawScope.drawKing(fillColor: Color, strokeColor: Color, pieceSize: Float) {
-    val scale = pieceSize / 100f
-    val centerX = center.x
-    val centerY = center.y
+private fun DrawScope.drawKing(fillColor: Color, strokeColor: Color) {
+    val w = size.width
+    val h = size.height
+    val strokeWidth = w * 0.05f
 
-    drawIntoCanvas { canvas ->
-        val paint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Fill
-            color = fillColor
-        }
-
-        val strokePaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 2f * scale
-            color = strokeColor
-        }
-
-        val path = Path().apply {
-            // Base
-            moveTo(centerX - 30f * scale, centerY + 40f * scale)
-            lineTo(centerX + 30f * scale, centerY + 40f * scale)
-            lineTo(centerX + 25f * scale, centerY + 30f * scale)
-
-            // Body
-            cubicTo(
-                centerX + 22f * scale, centerY + 20f * scale,
-                centerX + 20f * scale, centerY + 5f * scale,
-                centerX + 18f * scale, centerY - 5f * scale
-            )
-
-            // Crown base
-            lineTo(centerX + 15f * scale, centerY - 15f * scale)
-            lineTo(centerX + 12f * scale, centerY - 18f * scale)
-            lineTo(centerX + 8f * scale, centerY - 15f * scale)
-            lineTo(centerX + 5f * scale, centerY - 20f * scale)
-            lineTo(centerX, centerY - 15f * scale)
-            lineTo(centerX - 5f * scale, centerY - 20f * scale)
-            lineTo(centerX - 8f * scale, centerY - 15f * scale)
-            lineTo(centerX - 12f * scale, centerY - 18f * scale)
-            lineTo(centerX - 15f * scale, centerY - 15f * scale)
-
-            // Other side
-            lineTo(centerX - 18f * scale, centerY - 5f * scale)
-            cubicTo(
-                centerX - 20f * scale, centerY + 5f * scale,
-                centerX - 22f * scale, centerY + 20f * scale,
-                centerX - 25f * scale, centerY + 30f * scale
-            )
-
-            close()
-        }
-
-        canvas.drawPath(path, paint)
-        canvas.drawPath(path, strokePaint)
-
-        // Cross on top
-        val crossPaint = Paint().apply {
-            isAntiAlias = true
-            style = PaintingStyle.Stroke
-            strokeWidth = 3f * scale
-            color = strokeColor
-        }
-
-        // Vertical line
-        canvas.drawLine(
-            Offset(centerX, centerY - 30f * scale),
-            Offset(centerX, centerY - 15f * scale),
-            crossPaint
-        )
-
-        // Horizontal line
-        canvas.drawLine(
-            Offset(centerX - 5f * scale, centerY - 25f * scale),
-            Offset(centerX + 5f * scale, centerY - 25f * scale),
-            crossPaint
-        )
+    val path = Path().apply {
+        moveTo(w * 0.25f, h * 0.95f)
+        lineTo(w * 0.75f, h * 0.95f)
+        lineTo(w * 0.7f, h * 0.85f)
+        quadraticBezierTo(w * 0.5f, h * 0.75f, w * 0.6f, h * 0.5f)
+        lineTo(w * 0.6f, h * 0.45f)
+        lineTo(w * 0.4f, h * 0.45f)
+        lineTo(w * 0.4f, h * 0.5f)
+        quadraticBezierTo(w * 0.5f, h * 0.75f, w * 0.3f, h * 0.85f)
+        close()
     }
+    drawPath(path, fillColor)
+    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+
+    val crownPath = Path().apply {
+        moveTo(w * 0.4f, h * 0.45f)
+        lineTo(w * 0.3f, h * 0.2f)
+        lineTo(w * 0.5f, h * 0.3f)
+        lineTo(w * 0.7f, h * 0.2f)
+        lineTo(w * 0.6f, h * 0.45f)
+        close()
+    }
+    drawPath(crownPath, fillColor)
+    drawPath(crownPath, strokeColor, style = Stroke(width = strokeWidth))
+
+    // Cross on top
+    drawLine(strokeColor, Offset(w * 0.5f, h * 0.05f), Offset(w * 0.5f, h * 0.2f), strokeWidth)
+    drawLine(strokeColor, Offset(w * 0.4f, h * 0.12f), Offset(w * 0.6f, h * 0.12f), strokeWidth)
 }
 @Composable
 fun CheckIndicator() {
@@ -1072,9 +381,11 @@ fun FileRankLabels(squareSize: Dp, isBoardFlipped: Boolean) {
 @Composable
 fun GameControlsBar(
     isMyTurn: Boolean,
+    hasUnreadMessages: Boolean,
     onResign: () -> Unit,
     onOfferDraw: () -> Unit,
-    onChat: () -> Unit
+    onChat: () -> Unit,
+    onInfoClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -1092,12 +403,23 @@ fun GameControlsBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GameControlButton(
-                icon = Icons.Default.ChatBubble,
-                label = "Chat",
-                onClick = onChat,
-                tint = Color(0xFF4ECDC4)
-            )
+            BadgedBox(
+                badge = {
+                    if (hasUnreadMessages) {
+                        Badge(
+                            modifier = Modifier.offset(x = (-8).dp, y = 6.dp),
+                            containerColor = Color(0xFFFF5252)
+                        )
+                    }
+                }
+            ) {
+                GameControlButton(
+                    icon = Icons.Default.ChatBubble,
+                    label = "Chat",
+                    onClick = onChat,
+                    tint = Color(0xFF4ECDC4)
+                )
+            }
 
             GameControlButton(
                 icon = Icons.Default.Handshake,
@@ -1113,7 +435,61 @@ fun GameControlsBar(
                 onClick = onResign,
                 tint = Color(0xFFFF5252)
             )
+            GameControlButton(icon = Icons.Default.Info, label = "Info", onClick = onInfoClick, tint = Color(0xFF2196F3))
         }
+    }
+}
+// For the captured pieces
+@Composable
+fun CapturedPiecesRow(pieces: List<ChessPiece>) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth().height(24.dp).padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        items(pieces) { piece ->
+            Canvas(modifier = Modifier.size(20.dp)) {
+                drawChessPiece(pieceType = piece.type, pieceColor = piece.color)
+            }
+        }
+    }
+}
+
+// For the bottom sheet content
+@Composable
+fun GameInfoSheetContent(prizeInfo: PrizeInfo) {
+    LazyColumn(contentPadding = PaddingValues(16.dp), modifier = Modifier.fillMaxWidth()) {
+        item {
+            Text("Game Information", fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
+        }
+        item { InfoRow("Bet Amount", "₹${prizeInfo.betAmount}") }
+        item { InfoRow("Prize Pool (2x)", "₹${prizeInfo.prizePool}") }
+        item { InfoRow("Platform Fee (4%)", "- ₹${"%.2f".format(prizeInfo.platformFee)}", isDeduction = true) }
+        item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
+        item { InfoRow("Net Winnings", "₹${"%.2f".format(prizeInfo.taxableAmount)}") }
+        item { InfoRow("TDS (30% of Winnings)", "- ₹${"%.2f".format(prizeInfo.tdsDeducted)}", isDeduction = true) }
+        item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
+        item {
+            InfoRow("Final Payout to Winner", "₹${"%.2f".format(prizeInfo.winningsPayable)}", isHighlight = true)
+        }
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String, isDeduction: Boolean = false, isHighlight: Boolean = false) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = if (isHighlight) Color.White else Color.Gray)
+        Text(
+            value,
+            color = when {
+                isHighlight -> Color(0xFF4CAF50)
+                isDeduction -> Color(0xFFFF5252)
+                else -> Color.White
+            },
+            fontWeight = if(isHighlight) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }
 
@@ -1235,15 +611,16 @@ fun LoadingOverlay() {
 fun GameOverOverlay(
     result: GameResult,
     playerColor: PieceColor,
-    betAmount: Float,
+    prizeInfo: PrizeInfo, // Changed from betAmount to prizeInfo
     onDismiss: () -> Unit
 ) {
     val (title, subtitle, icon, color) = when (result) {
         is GameResult.Win -> {
             if (result.winner == playerColor) {
+                val payout = "%.2f".format(prizeInfo.winningsPayable)
                 Quadruple(
                     "Victory!",
-                    "You won ₹${betAmount * 2}",
+                    "You won ₹${payout}",
                     Icons.Default.EmojiEvents,
                     Color(0xFFFFD700)
                 )
@@ -1479,6 +856,143 @@ fun DrawOfferDialog(
                         Text("Offer Draw", color = Color.Black)
                     }
                 }
+            }
+        }
+    }
+}
+
+// --- NEW CHAT UI COMPOSABLE ---
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatSheetContent(
+    messages: List<ChatMessage>,
+    onSendMessage: (String) -> Unit,
+    currentUserId: String
+) {
+    var messageText by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // Scroll to bottom when new messages arrive
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            coroutineScope.launch {
+                listState.animateScrollToItem(messages.size - 1)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+    ) {
+        // Header
+        Text(
+            "In-Game Chat",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+
+        // Messages list
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(messages) { msg ->
+                ChatMessageItem(
+                    message = msg,
+                    isSentByCurrentUser = msg.userId == currentUserId
+                )
+            }
+        }
+
+        // Message input field
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shadowElevation = 8.dp // Add elevation to the input bar
+        ){
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    placeholder = { Text("Type a message...") },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(24.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = {
+                        onSendMessage(messageText)
+                        messageText = ""
+                        keyboardController?.hide()
+                    })
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        onSendMessage(messageText)
+                        messageText = ""
+                        keyboardController?.hide()
+                    },
+                    enabled = messageText.isNotBlank(),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(12.dp),
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.Send, contentDescription = "Send")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatMessageItem(message: ChatMessage, isSentByCurrentUser: Boolean) {
+    val alignment = if (isSentByCurrentUser) Alignment.CenterEnd else Alignment.CenterStart
+    val backgroundColor = if (isSentByCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (isSentByCurrentUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val bubbleShape = if (isSentByCurrentUser) {
+        RoundedCornerShape(16.dp, 4.dp, 16.dp, 16.dp)
+    } else {
+        RoundedCornerShape(4.dp, 16.dp, 16.dp, 16.dp)
+    }
+    val dateFormat = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
+
+
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = alignment) {
+        Column(
+            horizontalAlignment = if (isSentByCurrentUser) Alignment.End else Alignment.Start,
+            modifier = Modifier.widthIn(max = 300.dp)
+        ) {
+            Text(
+                text = if (isSentByCurrentUser) "You" else message.displayName,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 4.dp, start = 4.dp, end = 4.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .background(color = backgroundColor, shape = bubbleShape)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(text = message.message, color = textColor)
+            }
+            message.timestamp?.toDate()?.let {
+                Text(
+                    text = dateFormat.format(it),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp)
+                )
             }
         }
     }

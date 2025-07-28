@@ -1,5 +1,6 @@
 package `in`.chess.scholars.global.domain.usecases
 
+import `in`.chess.scholars.global.domain.model.ChatMessage
 import `in`.chess.scholars.global.domain.model.GameState
 import `in`.chess.scholars.global.domain.repository.GameRepository
 import `in`.chess.scholars.global.domain.model.GameResult
@@ -31,5 +32,23 @@ class UpdateGameUseCase(private val gameRepository: GameRepository) {
 class EndGameUseCase(private val gameRepository: GameRepository) {
     suspend operator fun invoke(gameId: String, result: GameResult): DataResult<Unit> {
         return gameRepository.endGame(gameId, result)
+    }
+}
+
+/**
+ * Use case to get a real-time stream of chat messages for a game.
+ */
+class GetChatStreamUseCase(private val gameRepository: GameRepository) {
+    operator fun invoke(gameId: String): Flow<DataResult<List<ChatMessage>>> {
+        return gameRepository.getChatStream(gameId)
+    }
+}
+
+/**
+ * Use case for sending a chat message.
+ */
+class SendMessageUseCase(private val gameRepository: GameRepository) {
+    suspend operator fun invoke(gameId: String, message: ChatMessage): DataResult<Unit> {
+        return gameRepository.sendMessage(gameId, message)
     }
 }

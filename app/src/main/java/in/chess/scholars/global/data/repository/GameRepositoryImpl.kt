@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import `in`.chess.scholars.global.domain.model.GameResult
 import `in`.chess.scholars.global.domain.model.GameState
 import `in`.chess.scholars.global.domain.model.Move
+import `in`.chess.scholars.global.domain.model.ChatMessage
 import `in`.chess.scholars.global.domain.repository.DataResult
 import `in`.chess.scholars.global.domain.repository.GameRepository
 import kotlinx.coroutines.channels.awaitClose
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.Query
 
 class GameRepositoryImpl(
     private val firestore: FirebaseFirestore
@@ -100,6 +102,38 @@ class GameRepositoryImpl(
                 }
             }
             gameRef.update(updates).await()
+            DataResult.Success(Unit)
+        } catch (e: Exception) {
+            DataResult.Error(e)
+        }
+    }
+
+    override fun getChatStream(gameId: String): Flow<DataResult<List<ChatMessage>>> = callbackFlow {
+        val messagesCollection = firestore.collection("games").document(gameId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .limitToLast(50) // Get the last 50 messages
+
+        val listener = messagesCollection.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                trySend(DataResult.Error(error))
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                val messages = snapshot.toObjects(ChatMessage::class.java)
+                trySend(DataResult.Success(messages))
+            }
+        }
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun sendMessage(gameId: String, message: ChatMessage): DataResult<Unit> {
+        return try {
+            firestore.collection("games").document(gameId)
+                .collection("messages")
+                .add(message)
+                .await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)

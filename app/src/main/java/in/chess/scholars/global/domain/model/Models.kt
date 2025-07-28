@@ -168,3 +168,13 @@ data class GameState(
     val endedAt: Timestamp? = null
 )
 
+data class ChatMessage(
+    val messageId: String = "",
+    val gameId: String = "",
+    val userId: String = "",
+    val displayName: String = "",
+    val message: String = "",
+    @ServerTimestamp
+    val timestamp: Timestamp? = null
+)
+

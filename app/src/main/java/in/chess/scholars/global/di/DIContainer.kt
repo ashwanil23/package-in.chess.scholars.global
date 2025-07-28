@@ -44,4 +44,6 @@ class DIContainer {
     val withdrawUseCase: WithdrawUseCase by lazy { WithdrawUseCase(walletRepository) }
     val getGameHistoryUseCase: GetGameHistoryUseCase by lazy { GetGameHistoryUseCase(statisticsRepository) }
     val getRatingHistoryUseCase: GetRatingHistoryUseCase by lazy { GetRatingHistoryUseCase(statisticsRepository) }
+    val getChatStreamUseCase: GetChatStreamUseCase by lazy { GetChatStreamUseCase(gameRepository) }
+    val sendMessageUseCase: SendMessageUseCase by lazy { SendMessageUseCase(gameRepository) }
 }

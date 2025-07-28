@@ -5,6 +5,9 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +36,7 @@ import `in`.chess.scholars.global.domain.model.*
 import kotlinx.coroutines.delay
 import kotlin.math.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     gameId: String,
@@ -41,12 +45,23 @@ fun GameScreen(
     viewModel: ChessGameViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val sheetState = rememberModalBottomSheetState() // 👈 Add this
+    var showInfoSheet by remember { mutableStateOf(false) } // 👈 Add this
     var showResignDialog by remember { mutableStateOf(false) }
     var showDrawDialog by remember { mutableStateOf(false) }
+    var showChatSheet by remember { mutableStateOf(false) }
 
+    // Notify ViewModel when chat sheet state changes
+    LaunchedEffect(showChatSheet) {
+        if (showChatSheet) {
+            viewModel.onChatOpened()
+        } else {
+            viewModel.onChatClosed()
+        }
+    }
     // Initialize the game when the screen is first composed
     LaunchedEffect(gameId) {
-        viewModel.initializeGame(gameId)
+        viewModel.initializeGame(gameId, betAmount)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -67,6 +82,9 @@ fun GameScreen(
                 timeLeft = "05:00", // TODO: Implement actual timer
                 isOpponent = true
             )
+            CapturedPiecesRow( // 👈 Add this
+                pieces = if (uiState.playerColor == PieceColor.WHITE) uiState.blackCapturedPieces else uiState.whiteCapturedPieces
+            )
 
             // Chess board with premium design
             Box(
@@ -81,7 +99,7 @@ fun GameScreen(
                     playerColor = uiState.playerColor,
                     selectedPiece = uiState.selectedPiece,
                     validMoves = uiState.validMoves,
-                    lastMove = null, // TODO: Track last move
+                    lastMove = uiState.lastMove, // 👈 Pass the last move
                     isCheck = uiState.isCheck,
                     onSquareClick = viewModel::onSquareClick
                 )
@@ -95,12 +113,17 @@ fun GameScreen(
             // Game controls
             GameControlsBar(
                 isMyTurn = uiState.isMyTurn,
+                hasUnreadMessages = uiState.hasUnreadMessages,
                 onResign = { showResignDialog = true },
                 onOfferDraw = { showDrawDialog = true },
-                onChat = { /* TODO: Implement chat */ }
+                onChat = { showChatSheet = true },
+                onInfoClick = { showInfoSheet = true }
             )
 
             // Current player info
+            CapturedPiecesRow( // 👈 Add this
+                pieces = if (uiState.playerColor == PieceColor.WHITE) uiState.whiteCapturedPieces else uiState.blackCapturedPieces
+            )
             PlayerInfoCard(
                 player = null, // Current user
                 isCurrentTurn = uiState.currentPlayer == uiState.playerColor,
@@ -108,7 +131,28 @@ fun GameScreen(
                 isOpponent = false
             )
         }
+        if (showInfoSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showInfoSheet = false },
+                sheetState = sheetState
+            ) {
+                GameInfoSheetContent(uiState.prizeInfo)
+            }
+        }
 
+        if (showChatSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showChatSheet = false },
+                sheetState = sheetState,
+                modifier = Modifier.fillMaxHeight(0.7f)
+            ) {
+                ChatSheetContent(
+                    messages = uiState.chatMessages,
+                    onSendMessage = viewModel::onSendMessage,
+                    currentUserId = viewModel.getCurrentUserId() ?: ""
+                )
+            }
+        }
         // Game status indicators
         GameStatusIndicators(
             isCheck = uiState.isCheck,
@@ -151,7 +195,7 @@ fun GameScreen(
             GameOverOverlay(
                 result = uiState.gameResult,
                 playerColor = uiState.playerColor,
-                betAmount = betAmount,
+                prizeInfo = uiState.prizeInfo, // Pass the entire prizeInfo object
                 onDismiss = { navController.popBackStack() }
             )
         }
@@ -535,3 +579,5 @@ private fun PremiumChessPiece(
         }
     }
 }
+
+

@@ -9,10 +9,25 @@ import `in`.chess.scholars.global.engine.ChessGameEngine
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+
+data class PrizeInfo(
+    val betAmount: Float = 0f,
+    val prizePool: Float = 0f,
+    val platformFee: Float = 0f,
+    val taxableAmount: Float = 0f,
+    val tdsDeducted: Float = 0f,
+    val winningsPayable: Float = 0f
+)
 /**
  * UI state for the Game screen.
  */
 data class GameUiState(
+    val chatMessages: List<ChatMessage> = emptyList(),
+    val hasUnreadMessages: Boolean = false, // ADDED: For new message indicator
+    val whiteCapturedPieces: List<ChessPiece> = emptyList(),
+    val blackCapturedPieces: List<ChessPiece> = emptyList(),
+    val prizeInfo: PrizeInfo = PrizeInfo(),
+    val lastMove: Pair<Position, Position>? = null,
     val isLoading: Boolean = true,
     val error: String? = null,
     val board: Array<Array<ChessPiece?>> = Array(8) { arrayOfNulls<ChessPiece>(8) },
@@ -43,6 +58,11 @@ data class GameUiState(
         if (isCheck != other.isCheck) return false
         if (gameResult != other.gameResult) return false
         if (opponentOfferedDraw != other.opponentOfferedDraw) return false
+        if (whiteCapturedPieces != other.whiteCapturedPieces) return false
+        if (blackCapturedPieces != other.blackCapturedPieces) return false
+        // --- FIX: Correctly compare the chat messages list ---
+        if (chatMessages != other.chatMessages) return false
+        if (hasUnreadMessages != other.hasUnreadMessages) return false
         return true
     }
 
@@ -59,6 +79,8 @@ data class GameUiState(
         result = 31 * result + isCheck.hashCode()
         result = 31 * result + gameResult.hashCode()
         result = 31 * result + opponentOfferedDraw.hashCode()
+        result = 31 * result + chatMessages.hashCode()
+        result = 31 * result + hasUnreadMessages.hashCode()
         return result
     }
 }
@@ -71,7 +93,9 @@ class ChessGameViewModel(
     private val updateGameUseCase: UpdateGameUseCase,
     private val endGameUseCase: EndGameUseCase,
     private val getUserDataUseCase: GetUserDataUseCase,
-    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase
+    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+    private val getChatStreamUseCase: GetChatStreamUseCase,
+    private val sendMessageUseCase: SendMessageUseCase
 ) : ViewModel() {
 
     private val gameEngine = ChessGameEngine()
@@ -79,15 +103,45 @@ class ChessGameViewModel(
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     private var gameId: String? = null
+    private var currentUserId: String? = null
+    private var currentUserData: UserData? = null
+    private var isChatSheetOpen = false
 
-    fun initializeGame(gameId: String) {
+    fun initializeGame(gameId: String, betAmount: Float) {
         this.gameId = gameId
+        this.currentUserId = getCurrentUserIdUseCase()
+        // Fetch current user data to get their display name for chat
+        viewModelScope.launch {
+            currentUserId?.let {
+                getUserDataUseCase(it).collect { result ->
+                    if (result is DataResult.Success) {
+                        currentUserData = result.data
+                    }
+                }
+            }
+        }
+
+        val prizePool = betAmount * 2
+        val platformFee = prizePool * 0.04f
+        val netWinnings = prizePool - platformFee - betAmount
+        val tdsDeducted = if (netWinnings > 0) netWinnings * 0.30f else 0f
+        val winningsPayable = prizePool - platformFee - tdsDeducted
+        val prizeInfo = PrizeInfo(
+            betAmount = betAmount,
+            prizePool = prizePool,
+            platformFee = platformFee,
+            taxableAmount = netWinnings,
+            tdsDeducted = tdsDeducted,
+            winningsPayable = winningsPayable
+        )
+        _uiState.value = _uiState.value.copy(prizeInfo = prizeInfo) // Set the prize info
         val currentUserId = getCurrentUserIdUseCase()
         if (gameId == "offline_game") { // Use a clearer ID
             gameEngine.resetBoard()
             updateLocalUiState(PieceColor.WHITE) // Update UI with the initial board state
             return // Stop here, don't try to fetch from Firestore
         }
+        listenForChatMessages(gameId)
 
         viewModelScope.launch {
             getGameStreamUseCase(gameId).collect { result ->
@@ -97,13 +151,11 @@ class ChessGameViewModel(
                         val playerColor = if (gameState.player1Id == currentUserId) PieceColor.WHITE else PieceColor.BLACK
                         val opponentId = if (playerColor == PieceColor.WHITE) gameState.player2Id else gameState.player1Id
 
-                        // Update game engine with moves from Firestore
                         gameEngine.resetBoard()
                         gameState.moves.forEach { move -> gameEngine.makeMove(move.from, move.to) }
 
                         updateLocalUiState(playerColor)
 
-                        // Fetch opponent data if not already loaded
                         if (_uiState.value.opponentData == null && opponentId.isNotEmpty()) {
                             fetchOpponentData(opponentId)
                         }
@@ -114,6 +166,52 @@ class ChessGameViewModel(
                 }
             }
         }
+    }
+    // --- NEW CHAT FUNCTIONS ---
+    private fun listenForChatMessages(gameId: String) {
+        if (gameId == "offline_game") return
+
+        viewModelScope.launch {
+            getChatStreamUseCase(gameId).collect { result ->
+                if (result is DataResult.Success) {
+                    val hasNew = if (isChatSheetOpen) false else result.data.isNotEmpty()
+                    _uiState.value = _uiState.value.copy(
+                        chatMessages = result.data,
+                        hasUnreadMessages = hasNew
+                    )
+                }
+            }
+        }
+    }
+
+    fun onSendMessage(messageText: String) {
+        val gameId = this.gameId ?: return
+        val userId = this.currentUserId ?: return
+        val displayName = this.currentUserData?.displayName ?: "Player"
+
+        if (messageText.isBlank()) return
+
+        val chatMessage = ChatMessage(
+            gameId = gameId,
+            userId = userId,
+            displayName = displayName,
+            message = messageText.trim()
+        )
+
+        viewModelScope.launch {
+            sendMessageUseCase(gameId, chatMessage)
+        }
+    }
+
+    fun getCurrentUserId(): String? {
+        return currentUserId
+    }
+    fun onChatOpened() {
+        isChatSheetOpen = true
+        _uiState.value = _uiState.value.copy(hasUnreadMessages = false)
+    }
+    fun onChatClosed() {
+        isChatSheetOpen = false
     }
 
     private fun fetchOpponentData(opponentId: String) {
@@ -128,13 +226,11 @@ class ChessGameViewModel(
 
     fun onSquareClick(position: Position) {
         if (!uiState.value.isMyTurn && gameId != "offline_game") return
-        // For any local game, we don't check for "my turn"
         if (uiState.value.gameResult !is GameResult.InProgress) return
         val selectedPos = _uiState.value.selectedPiece
         val pieceAtPos = gameEngine.board.value.getOrNull(position.row)?.getOrNull(position.col)
 
         if (selectedPos == null) {
-            // If no piece is selected, select the clicked piece if it's ours
             if (pieceAtPos != null && pieceAtPos.color == gameEngine.currentPlayer.value) {
                 _uiState.value = _uiState.value.copy(
                     selectedPiece = position,
@@ -142,18 +238,15 @@ class ChessGameViewModel(
                 )
             }
         } else {
-            // If a piece is selected, try to move it
             if (position in _uiState.value.validMoves) {
                 makeMove(selectedPos, position)
             } else {
-                // If the click is on another of our pieces, switch selection
                 if (pieceAtPos != null && pieceAtPos.color == gameEngine.currentPlayer.value) {
                     _uiState.value = _uiState.value.copy(
                         selectedPiece = position,
                         validMoves = gameEngine.getValidMovesForPiece(position)
                     )
                 } else {
-                    // Deselect
                     _uiState.value = _uiState.value.copy(selectedPiece = null, validMoves = emptySet())
                 }
             }
@@ -162,13 +255,11 @@ class ChessGameViewModel(
 
     private fun makeMove(from: Position, to: Position) {
         val piece = gameEngine.board.value[from.row][from.col] ?: return
-        // Get the captured piece BEFORE making the move
         val capturedPiece = gameEngine.board.value[to.row][to.col]
-        val move = Move(from, to, piece = piece, capturedPiece = capturedPiece) // 👈 Add capturedPiece
+        val move = Move(from, to, piece = piece, capturedPiece = capturedPiece)
 
         if (gameEngine.makeMove(from, to)) {
-            updateLocalUiState(_uiState.value.playerColor) // Update UI immediately for responsiveness
-            // Only send move to server if it's not a practice game
+            updateLocalUiState(_uiState.value.playerColor)
             if (gameId != "offline_game") {
                 viewModelScope.launch {
                     updateGameUseCase(gameId!!, move)
@@ -190,8 +281,7 @@ class ChessGameViewModel(
     }
 
     fun offerDraw() {
-        // In a real implementation, this would set a "drawOfferedBy" field in Firestore
-        // For now, we assume the use case handles this logic
+        // TODO: Implement draw offer logic
     }
 
     fun acceptDraw() {
@@ -201,18 +291,32 @@ class ChessGameViewModel(
         }
     }
 
-    private fun updateLocalUiState(playerColor: PieceColor) { // 👈 Change is here
+    private fun updateLocalUiState(playerColor: PieceColor) {
         val newBoardState = gameEngine.board.value.map { it.clone() }.toTypedArray()
+        val whiteCaptured = mutableListOf<ChessPiece>()
+        val blackCaptured = mutableListOf<ChessPiece>()
+        gameEngine.gameHistory.forEach { move ->
+            move.capturedPiece?.let {
+                if (it.color == PieceColor.WHITE) {
+                    whiteCaptured.add(it)
+                } else {
+                    blackCaptured.add(it)
+                }
+            }
+        }
         _uiState.value = _uiState.value.copy(
             isLoading = false,
             board = newBoardState,
             currentPlayer = gameEngine.currentPlayer.value,
-            playerColor = playerColor, // 👈 Change is here
-            isMyTurn = if (gameId != "offline_game") gameEngine.currentPlayer.value == playerColor else true, // 👈 Change is here
+            playerColor = playerColor,
+            isMyTurn = if (gameId != "offline_game") gameEngine.currentPlayer.value == playerColor else true,
             isCheck = gameEngine.isCheck.value,
             gameResult = gameEngine.getGameResult(),
             selectedPiece = null,
-            validMoves = emptySet()
+            validMoves = emptySet(),
+            whiteCapturedPieces = whiteCaptured,
+            blackCapturedPieces = blackCaptured,
+            lastMove = gameEngine.gameHistory.lastOrNull()?.let { it.from to it.to }
         )
     }
 }

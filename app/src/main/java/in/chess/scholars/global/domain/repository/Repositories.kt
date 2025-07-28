@@ -1,4 +1,4 @@
-package `in`.chess.scholars.global.domain.repository
+    package `in`.chess.scholars.global.domain.repository
 
 import android.app.GameState
 import `in`.chess.scholars.global.domain.model.*
@@ -66,6 +66,11 @@ interface GameRepository {
 
     /** Finalizes a game, updating its status to complete. */
     suspend fun endGame(gameId: String, result: GameResult): DataResult<Unit>
+
+    fun getChatStream(gameId: String): Flow<DataResult<List<ChatMessage>>>
+
+    /** Sends a new chat message in a game. */
+    suspend fun sendMessage(gameId: String, message: ChatMessage): DataResult<Unit>
 }
 
 /**
