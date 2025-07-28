@@ -1,6 +1,7 @@
 package `in`.chess.scholars.global.data.repository
 
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import `in`.chess.scholars.global.domain.model.GameHistory
@@ -41,7 +42,8 @@ class StatisticsRepositoryImpl(
 
             val allGames = (gamesAsPlayer1.documents + gamesAsPlayer2.documents)
                 .distinctBy { it.id }
-                .sortedByDescending { (it.getLong("createdAt") ?: 0) }
+                // FIX: Sort by Timestamp object directly before converting to Long
+                .sortedByDescending { it.getTimestamp("createdAt") }
 
             val gameHistories = allGames.mapNotNull { doc ->
                 val data = doc.data ?: return@mapNotNull null
@@ -55,10 +57,14 @@ class StatisticsRepositoryImpl(
                     else -> GameResultStats.LOSS
                 }
 
-                val opponentId = if (isPlayer1) data["player2Id"] as? String else data["player1Id   "] as? String
+                val opponentId = if (isPlayer1) data["player2Id"] as? String else data["player1Id"] as? String
                 // In a real app, you might fetch opponent details here or pass the ID
                 val opponentName = "Opponent" // Placeholder
                 val opponentRating = 1200 // Placeholder
+
+                // FIX: Safely get Timestamps and convert them to Long for the data model
+                val createdAt = doc.getTimestamp("createdAt")?.toDate()?.time ?: 0L
+                val endedAt = doc.getTimestamp("endedAt")?.toDate()?.time ?: 0L
 
                 GameHistory(
                     gameId = doc.id,
@@ -67,8 +73,8 @@ class StatisticsRepositoryImpl(
                     result = result,
                     ratingChange = (data["ratingChange"] as? Long)?.toInt() ?: 0,
                     betAmount = (data["betAmount"] as? Double)?.toFloat() ?: 0f,
-                    duration = (data["endedAt"] as? Long ?: 0L) - (data["createdAt"] as? Long ?: 0L),
-                    date = data["createdAt"] as? Long ?: 0L
+                    duration = endedAt - createdAt,
+                    date = createdAt
                 )
             }
 

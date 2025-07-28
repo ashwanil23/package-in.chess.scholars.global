@@ -223,7 +223,9 @@ class LocalCacheManager(
             wins = userData.wins,
             draws = userData.draws,
             losses = userData.losses,
-            createdAt = userData.createdAt,
+            // FIX: Convert Timestamp? to Long for Room DB storage.
+            // This resolves the "Argument type mismatch" error.
+            createdAt = userData.createdAt?.toDate()?.time ?: 0L,
             kycStatus = userData.kycStatus.name,
             verified = userData.verified
         )
@@ -250,7 +252,8 @@ class LocalCacheManager(
                 wins = cached.wins,
                 draws = cached.draws,
                 losses = cached.losses,
-                createdAt = cached.createdAt,
+                // FIX: Convert Long from Room DB back to a Timestamp object.
+                createdAt = Timestamp(Date(cached.createdAt)),
                 kycStatus = KycStatus.valueOf(cached.kycStatus),
                 panNumber = null,
                 aadharNumber = null,

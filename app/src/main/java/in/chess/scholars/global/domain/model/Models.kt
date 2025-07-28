@@ -14,7 +14,10 @@ data class UserData(
     val wins: Int = 0,
     val draws: Int = 0,
     val losses: Int = 0,
-    val createdAt: Long = System.currentTimeMillis(),
+    // FIX: Changed from Long to Timestamp? to correctly handle Firestore's native time format.
+    // This will resolve the "is not a java.lang.Number" crash.
+    @ServerTimestamp
+    val createdAt: Timestamp? = null,
     val kycStatus: KycStatus = KycStatus.NOT_STARTED,
     val panNumber: String? = null,
     val aadharNumber: String? = null,
@@ -177,4 +180,3 @@ data class ChatMessage(
     @ServerTimestamp
     val timestamp: Timestamp? = null
 )
-

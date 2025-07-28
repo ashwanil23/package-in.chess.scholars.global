@@ -1,5 +1,6 @@
 package `in`.chess.scholars.global.data.repository
 
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
@@ -49,7 +50,9 @@ class AuthRepositoryImpl(
                     uid = user.uid,
                     email = email,
                     displayName = displayName,
-                    createdAt = System.currentTimeMillis()
+                    // FIX: Changed from System.currentTimeMillis() to Timestamp.now()
+                    // This ensures new users are created with the correct, consistent data type.
+                    createdAt = Timestamp.now()
                 )
                 firestore.collection("users").document(user.uid).set(newUser).await()
                 _isLoggedIn.value = true
