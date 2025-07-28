@@ -61,20 +61,19 @@ class GameRepositoryImpl(
         return try {
             val gameRef = firestore.collection("games").document(gameId)
 
-            // Convert the Move data class to a Map to ensure compatibility with FieldValue.arrayUnion
-            val moveMap = mapOf(
-                "from" to mapOf("row" to move.from.row, "col" to move.from.col),
-                "to" to mapOf("row" to move.to.row, "col" to move.to.col),
-                "piece" to mapOf(
-                    "type" to move.piece.type.name,
-                    "color" to move.piece.color.name
-                ),
-                "capturedPiece" to move.capturedPiece?.let {
-                    mapOf("type" to it.type.name, "color" to it.color.name)
-                }
+            // Get the current player from the move object
+            val currentPlayer = move.piece.color.name
+            val nextPlayer = if (currentPlayer == "WHITE") "BLACK" else "WHITE"
+
+            // Create a map of all updates to send in one transaction
+            val updates = mapOf(
+                "moves" to FieldValue.arrayUnion(move),
+                "currentPlayer" to nextPlayer,
+                "lastMoveAt" to FieldValue.serverTimestamp()
             )
 
-            gameRef.update("moves", FieldValue.arrayUnion(moveMap)).await()
+            gameRef.update(updates).await()
+
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)

@@ -85,7 +85,7 @@ class ChessGameViewModel(
         val currentUserId = getCurrentUserIdUseCase()
         if (gameId == "offline_game") { // Use a clearer ID
             gameEngine.resetBoard()
-            updateLocalUiState() // Update UI with the initial board state
+            updateLocalUiState(PieceColor.WHITE) // Update UI with the initial board state
             return // Stop here, don't try to fetch from Firestore
         }
 
@@ -101,7 +101,7 @@ class ChessGameViewModel(
                         gameEngine.resetBoard()
                         gameState.moves.forEach { move -> gameEngine.makeMove(move.from, move.to) }
 
-                        updateLocalUiState()
+                        updateLocalUiState(playerColor)
 
                         // Fetch opponent data if not already loaded
                         if (_uiState.value.opponentData == null && opponentId.isNotEmpty()) {
@@ -127,6 +127,7 @@ class ChessGameViewModel(
     }
 
     fun onSquareClick(position: Position) {
+        if (!uiState.value.isMyTurn && gameId != "offline_game") return
         // For any local game, we don't check for "my turn"
         if (uiState.value.gameResult !is GameResult.InProgress) return
         val selectedPos = _uiState.value.selectedPiece
@@ -161,9 +162,12 @@ class ChessGameViewModel(
 
     private fun makeMove(from: Position, to: Position) {
         val piece = gameEngine.board.value[from.row][from.col] ?: return
-        val move = Move(from, to, piece = piece)
+        // Get the captured piece BEFORE making the move
+        val capturedPiece = gameEngine.board.value[to.row][to.col]
+        val move = Move(from, to, piece = piece, capturedPiece = capturedPiece) // 👈 Add capturedPiece
+
         if (gameEngine.makeMove(from, to)) {
-            updateLocalUiState() // Update UI immediately for responsiveness
+            updateLocalUiState(_uiState.value.playerColor) // Update UI immediately for responsiveness
             // Only send move to server if it's not a practice game
             if (gameId != "offline_game") {
                 viewModelScope.launch {
@@ -197,14 +201,14 @@ class ChessGameViewModel(
         }
     }
 
-    private fun updateLocalUiState() {
+    private fun updateLocalUiState(playerColor: PieceColor) { // 👈 Change is here
         val newBoardState = gameEngine.board.value.map { it.clone() }.toTypedArray()
-        val playerColor = _uiState.value.playerColor
         _uiState.value = _uiState.value.copy(
             isLoading = false,
             board = newBoardState,
             currentPlayer = gameEngine.currentPlayer.value,
-            isMyTurn = if(gameId != "offline_game") gameEngine.currentPlayer.value == playerColor else false,
+            playerColor = playerColor, // 👈 Change is here
+            isMyTurn = if (gameId != "offline_game") gameEngine.currentPlayer.value == playerColor else true, // 👈 Change is here
             isCheck = gameEngine.isCheck.value,
             gameResult = gameEngine.getGameResult(),
             selectedPiece = null,

@@ -38,7 +38,7 @@ enum class PieceColor { WHITE, BLACK }
  * @param row The row index (0-7).
  * @param col The column index (0-7).
  */
-data class Position(val row: Int, val col: Int) {
+data class Position(val row: Int = 0, val col: Int = 0) {
     fun isValid() = row in 0..7 && col in 0..7
 }
 
@@ -46,9 +46,9 @@ data class Position(val row: Int, val col: Int) {
  * Represents a single chess piece with its properties.
  */
 data class ChessPiece(
-    val type: PieceType,
-    val color: PieceColor,
-    val position: Position,
+    val type: PieceType = PieceType.PAWN,
+    val color: PieceColor = PieceColor.WHITE,
+    val position: Position = Position(),
     val hasMoved: Boolean = false
 )
 
@@ -56,9 +56,9 @@ data class ChessPiece(
  * Represents a single move made in a game.
  */
 data class Move(
-    val from: Position,
-    val to: Position,
-    val piece: ChessPiece,
+    val from: Position = Position(),
+    val to: Position = Position(),
+    val piece: ChessPiece = ChessPiece(),
     val capturedPiece: ChessPiece? = null,
     val isPromotion: Boolean = false,
     val isCastling: Boolean = false,
@@ -152,13 +152,19 @@ data class GameState(
     val gameId: String = "",
     val player1Id: String = "",
     val player2Id: String = "",
+    val player1Color: String = "WHITE", // 👈 Add this
+    val player2Color: String = "BLACK", // 👈 Add this
+    val currentPlayer: String = "WHITE", // 👈 Add this
     val moves: List<Move> = emptyList(),
-    val status: String = "in_progress", // e.g., "in_progress", "finished", "draw"
-    val winner: String? = null, // "WHITE" or "BLACK"
+    val status: String = "active",
+    val winner: String? = null,
     val drawReason: String? = null,
-    @ServerTimestamp // Add this annotation
-    val createdAt: Timestamp? = null, // Change Long to Timestamp? and default to null
+    val betAmount: Float = 0f, // 👈 Add this
     @ServerTimestamp
-    val endedAt: Timestamp? = null // Change Long? to Timestamp? for consistency
+    val createdAt: Timestamp? = null,
+    @ServerTimestamp
+    val lastMoveAt: Timestamp? = null, // 👈 Add this
+    @ServerTimestamp
+    val endedAt: Timestamp? = null
 )
 
