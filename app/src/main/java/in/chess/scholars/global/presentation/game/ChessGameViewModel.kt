@@ -1,3 +1,333 @@
+//package `in`.chess.scholars.global.presentation.game
+//
+//import androidx.lifecycle.ViewModel
+//import androidx.lifecycle.viewModelScope
+//import `in`.chess.scholars.global.domain.model.*
+//import `in`.chess.scholars.global.domain.repository.DataResult
+//import `in`.chess.scholars.global.domain.usecases.*
+//import `in`.chess.scholars.global.engine.ChessGameEngine
+//import kotlinx.coroutines.flow.*
+//import kotlinx.coroutines.launch
+//
+//
+//data class PrizeInfo(
+//    val betAmount: Float = 0f,
+//    val prizePool: Float = 0f,
+//    val platformFee: Float = 0f,
+//    val taxableAmount: Float = 0f,
+//    val tdsDeducted: Float = 0f,
+//    val winningsPayable: Float = 0f
+//)
+///**
+// * UI state for the Game screen.
+// */
+//data class GameUiState(
+//    val chatMessages: List<ChatMessage> = emptyList(),
+//    val hasUnreadMessages: Boolean = false, // ADDED: For new message indicator
+//    val whiteCapturedPieces: List<ChessPiece> = emptyList(),
+//    val blackCapturedPieces: List<ChessPiece> = emptyList(),
+//    val prizeInfo: PrizeInfo = PrizeInfo(),
+//    val lastMove: Pair<Position, Position>? = null,
+//    val isLoading: Boolean = true,
+//    val error: String? = null,
+//    val board: Array<Array<ChessPiece?>> = Array(8) { arrayOfNulls<ChessPiece>(8) },
+//    val currentPlayer: PieceColor = PieceColor.WHITE,
+//    val playerColor: PieceColor = PieceColor.WHITE,
+//    val opponentData: UserData? = null,
+//    val isMyTurn: Boolean = false,
+//    val selectedPiece: Position? = null,
+//    val validMoves: Set<Position> = emptySet(),
+//    val isCheck: Boolean = false,
+//    val gameResult: GameResult = GameResult.InProgress,
+//    val opponentOfferedDraw: Boolean = false
+//) {
+//    // Override equals and hashCode to prevent recomposition from the board array instance change
+//    override fun equals(other: Any?): Boolean {
+//        if (this === other) return true
+//        if (javaClass != other?.javaClass) return false
+//        other as GameUiState
+//        if (isLoading != other.isLoading) return false
+//        if (error != other.error) return false
+//        if (!board.contentDeepEquals(other.board)) return false
+//        if (currentPlayer != other.currentPlayer) return false
+//        if (playerColor != other.playerColor) return false
+//        if (opponentData != other.opponentData) return false
+//        if (isMyTurn != other.isMyTurn) return false
+//        if (selectedPiece != other.selectedPiece) return false
+//        if (validMoves != other.validMoves) return false
+//        if (isCheck != other.isCheck) return false
+//        if (gameResult != other.gameResult) return false
+//        if (opponentOfferedDraw != other.opponentOfferedDraw) return false
+//        if (whiteCapturedPieces != other.whiteCapturedPieces) return false
+//        if (blackCapturedPieces != other.blackCapturedPieces) return false
+//        // --- FIX: Correctly compare the chat messages list ---
+//        if (chatMessages != other.chatMessages) return false
+//        if (hasUnreadMessages != other.hasUnreadMessages) return false
+//        return true
+//    }
+//
+//    override fun hashCode(): Int {
+//        var result = isLoading.hashCode()
+//        result = 31 * result + (error?.hashCode() ?: 0)
+//        result = 31 * result + board.contentDeepHashCode()
+//        result = 31 * result + currentPlayer.hashCode()
+//        result = 31 * result + playerColor.hashCode()
+//        result = 31 * result + (opponentData?.hashCode() ?: 0)
+//        result = 31 * result + isMyTurn.hashCode()
+//        result = 31 * result + (selectedPiece?.hashCode() ?: 0)
+//        result = 31 * result + validMoves.hashCode()
+//        result = 31 * result + isCheck.hashCode()
+//        result = 31 * result + gameResult.hashCode()
+//        result = 31 * result + opponentOfferedDraw.hashCode()
+//        result = 31 * result + chatMessages.hashCode()
+//        result = 31 * result + hasUnreadMessages.hashCode()
+//        return result
+//    }
+//}
+//
+///**
+// * ViewModel for the chess game screen.
+// */
+//class ChessGameViewModel(
+//    private val getGameStreamUseCase: GetGameStreamUseCase,
+//    private val updateGameUseCase: UpdateGameUseCase,
+//    private val endGameUseCase: EndGameUseCase,
+//    private val getUserDataUseCase: GetUserDataUseCase,
+//    private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
+//    private val getChatStreamUseCase: GetChatStreamUseCase,
+//    private val sendMessageUseCase: SendMessageUseCase
+//) : ViewModel() {
+//
+//    private val gameEngine = ChessGameEngine()
+//    private val _uiState = MutableStateFlow(GameUiState(board = gameEngine.board.value))
+//    val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
+//
+//    private var gameId: String? = null
+//    private var currentUserId: String? = null
+//    private var currentUserData: UserData? = null
+//    private var isChatSheetOpen = false
+//
+//    fun initializeGame(gameId: String, betAmount: Float) {
+//        this.gameId = gameId
+//        this.currentUserId = getCurrentUserIdUseCase()
+//        // Fetch current user data to get their display name for chat
+//        viewModelScope.launch {
+//            currentUserId?.let {
+//                getUserDataUseCase(it).collect { result ->
+//                    if (result is DataResult.Success) {
+//                        currentUserData = result.data
+//                    }
+//                }
+//            }
+//        }
+//
+//        val prizePool = betAmount * 2
+//        val platformFee = prizePool * 0.04f
+//        val netWinnings = prizePool - platformFee - betAmount
+//        val tdsDeducted = if (netWinnings > 0) netWinnings * 0.30f else 0f
+//        val winningsPayable = prizePool - platformFee - tdsDeducted
+//        val prizeInfo = PrizeInfo(
+//            betAmount = betAmount,
+//            prizePool = prizePool,
+//            platformFee = platformFee,
+//            taxableAmount = netWinnings,
+//            tdsDeducted = tdsDeducted,
+//            winningsPayable = winningsPayable
+//        )
+//        _uiState.value = _uiState.value.copy(prizeInfo = prizeInfo) // Set the prize info
+//        val currentUserId = getCurrentUserIdUseCase()
+//        if (gameId == "offline_game") { // Use a clearer ID
+//            gameEngine.resetBoard()
+//            updateLocalUiState(PieceColor.WHITE) // Update UI with the initial board state
+//            return // Stop here, don't try to fetch from Firestore
+//        }
+//        listenForChatMessages(gameId)
+//
+//        viewModelScope.launch {
+//            getGameStreamUseCase(gameId).collect { result ->
+//                when (result) {
+//                    is DataResult.Success -> {
+//                        val gameState = result.data
+//                        val playerColor = if (gameState.player1Id == currentUserId) PieceColor.WHITE else PieceColor.BLACK
+//                        val opponentId = if (playerColor == PieceColor.WHITE) gameState.player2Id else gameState.player1Id
+//
+//                        gameEngine.resetBoard()
+//                        gameState.moves.forEach { move -> gameEngine.makeMove(move.from, move.to) }
+//
+//                        updateLocalUiState(playerColor)
+//
+//                        if (_uiState.value.opponentData == null && opponentId.isNotEmpty()) {
+//                            fetchOpponentData(opponentId)
+//                        }
+//                    }
+//                    is DataResult.Error -> {
+//                        _uiState.value = _uiState.value.copy(isLoading = false, error = result.exception.message)
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    // --- NEW CHAT FUNCTIONS ---
+//    private fun listenForChatMessages(gameId: String) {
+//        if (gameId == "offline_game") return
+//
+//        viewModelScope.launch {
+//            getChatStreamUseCase(gameId).collect { result ->
+//                if (result is DataResult.Success) {
+//                    val hasNew = if (isChatSheetOpen) false else result.data.isNotEmpty()
+//                    _uiState.value = _uiState.value.copy(
+//                        chatMessages = result.data,
+//                        hasUnreadMessages = hasNew
+//                    )
+//                }
+//            }
+//        }
+//    }
+//
+//    fun onSendMessage(messageText: String) {
+//        val gameId = this.gameId ?: return
+//        val userId = this.currentUserId ?: return
+//        val displayName = this.currentUserData?.displayName ?: "Player"
+//
+//        if (messageText.isBlank()) return
+//
+//        val chatMessage = ChatMessage(
+//            gameId = gameId,
+//            userId = userId,
+//            displayName = displayName,
+//            message = messageText.trim()
+//        )
+//
+//        viewModelScope.launch {
+//            sendMessageUseCase(gameId, chatMessage)
+//        }
+//    }
+//
+//    fun getCurrentUserId(): String? {
+//        return currentUserId
+//    }
+//    fun onChatOpened() {
+//        isChatSheetOpen = true
+//        _uiState.value = _uiState.value.copy(hasUnreadMessages = false)
+//    }
+//    fun onChatClosed() {
+//        isChatSheetOpen = false
+//    }
+//
+//    private fun fetchOpponentData(opponentId: String) {
+//        viewModelScope.launch {
+//            getUserDataUseCase(opponentId).collect { result ->
+//                if (result is DataResult.Success) {
+//                    _uiState.value = _uiState.value.copy(opponentData = result.data)
+//                }
+//            }
+//        }
+//    }
+//
+//    fun onSquareClick(position: Position) {
+//        if (!uiState.value.isMyTurn && gameId != "offline_game") return
+//        if (uiState.value.gameResult !is GameResult.InProgress) return
+//        val selectedPos = _uiState.value.selectedPiece
+//        val pieceAtPos = gameEngine.board.value.getOrNull(position.row)?.getOrNull(position.col)
+//
+//        if (selectedPos == null) {
+//            if (pieceAtPos != null && pieceAtPos.color == gameEngine.currentPlayer.value) {
+//                _uiState.value = _uiState.value.copy(
+//                    selectedPiece = position,
+//                    validMoves = gameEngine.getValidMovesForPiece(position)
+//                )
+//            }
+//        } else {
+//            if (position in _uiState.value.validMoves) {
+//                makeMove(selectedPos, position)
+//            } else {
+//                if (pieceAtPos != null && pieceAtPos.color == gameEngine.currentPlayer.value) {
+//                    _uiState.value = _uiState.value.copy(
+//                        selectedPiece = position,
+//                        validMoves = gameEngine.getValidMovesForPiece(position)
+//                    )
+//                } else {
+//                    _uiState.value = _uiState.value.copy(selectedPiece = null, validMoves = emptySet())
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun makeMove(from: Position, to: Position) {
+//        val piece = gameEngine.board.value[from.row][from.col] ?: return
+//        val capturedPiece = gameEngine.board.value[to.row][to.col]
+//        val move = Move(from, to, piece = piece, capturedPiece = capturedPiece)
+//
+//        if (gameEngine.makeMove(from, to)) {
+//            updateLocalUiState(_uiState.value.playerColor)
+//            if (gameId != "offline_game") {
+//                viewModelScope.launch {
+//                    updateGameUseCase(gameId!!, move)
+//                    val result = gameEngine.getGameResult()
+//                    if (result !is GameResult.InProgress) {
+//                        endGameUseCase(gameId!!, result)
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    fun resignGame() {
+//        val winner = if (_uiState.value.playerColor == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
+//        val result = GameResult.Win(winner)
+//        viewModelScope.launch {
+//            endGameUseCase(gameId!!, result)
+//        }
+//    }
+//
+//    fun offerDraw() {
+//        // TODO: Implement draw offer logic
+//    }
+//
+//    fun acceptDraw() {
+//        val result = GameResult.Draw(DrawReason.AGREEMENT)
+//        viewModelScope.launch {
+//            endGameUseCase(gameId!!, result)
+//        }
+//    }
+//
+//    private fun updateLocalUiState(playerColor: PieceColor) {
+//        val newBoardState = gameEngine.board.value.map { it.clone() }.toTypedArray()
+//        val whiteCaptured = mutableListOf<ChessPiece>()
+//        val blackCaptured = mutableListOf<ChessPiece>()
+//        gameEngine.gameHistory.forEach { move ->
+//            move.capturedPiece?.let {
+//                if (it.color == PieceColor.WHITE) {
+//                    whiteCaptured.add(it)
+//                } else {
+//                    blackCaptured.add(it)
+//                }
+//            }
+//        }
+//        _uiState.value = _uiState.value.copy(
+//            isLoading = false,
+//            board = newBoardState,
+//            currentPlayer = gameEngine.currentPlayer.value,
+//            playerColor = playerColor,
+//            isMyTurn = if (gameId != "offline_game") gameEngine.currentPlayer.value == playerColor else true,
+//            isCheck = gameEngine.isCheck.value,
+//            gameResult = gameEngine.getGameResult(),
+//            selectedPiece = null,
+//            validMoves = emptySet(),
+//            whiteCapturedPieces = whiteCaptured,
+//            blackCapturedPieces = blackCaptured,
+//            lastMove = gameEngine.gameHistory.lastOrNull()?.let { it.from to it.to }
+//        )
+//    }
+//}
+//
+
+
+
+
+
+
+
 package `in`.chess.scholars.global.presentation.game
 
 import androidx.lifecycle.ViewModel
@@ -6,7 +336,10 @@ import `in`.chess.scholars.global.domain.model.*
 import `in`.chess.scholars.global.domain.repository.DataResult
 import `in`.chess.scholars.global.domain.usecases.*
 import `in`.chess.scholars.global.engine.ChessGameEngine
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 
@@ -23,7 +356,7 @@ data class PrizeInfo(
  */
 data class GameUiState(
     val chatMessages: List<ChatMessage> = emptyList(),
-    val hasUnreadMessages: Boolean = false, // ADDED: For new message indicator
+    val hasUnreadMessages: Boolean = false,
     val whiteCapturedPieces: List<ChessPiece> = emptyList(),
     val blackCapturedPieces: List<ChessPiece> = emptyList(),
     val prizeInfo: PrizeInfo = PrizeInfo(),
@@ -39,8 +372,15 @@ data class GameUiState(
     val validMoves: Set<Position> = emptySet(),
     val isCheck: Boolean = false,
     val gameResult: GameResult = GameResult.InProgress,
-    val opponentOfferedDraw: Boolean = false
+    val drawOfferState: DrawOfferState = DrawOfferState.NONE,
+    // CORRECTED: Added timer values to UI state
+    val player1TimeLeftMs: Long = DEFAULT_GAME_TIME_MS,
+    val player2TimeLeftMs: Long = DEFAULT_GAME_TIME_MS
 ) {
+    // Enum to manage the state of a draw offer
+    enum class DrawOfferState {
+        NONE, SENT, RECEIVED
+    }
     // Override equals and hashCode to prevent recomposition from the board array instance change
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -57,10 +397,11 @@ data class GameUiState(
         if (validMoves != other.validMoves) return false
         if (isCheck != other.isCheck) return false
         if (gameResult != other.gameResult) return false
-        if (opponentOfferedDraw != other.opponentOfferedDraw) return false
+        if (drawOfferState != other.drawOfferState) return false
+        if (player1TimeLeftMs != other.player1TimeLeftMs) return false
+        if (player2TimeLeftMs != other.player2TimeLeftMs) return false
         if (whiteCapturedPieces != other.whiteCapturedPieces) return false
         if (blackCapturedPieces != other.blackCapturedPieces) return false
-        // --- FIX: Correctly compare the chat messages list ---
         if (chatMessages != other.chatMessages) return false
         if (hasUnreadMessages != other.hasUnreadMessages) return false
         return true
@@ -78,7 +419,9 @@ data class GameUiState(
         result = 31 * result + validMoves.hashCode()
         result = 31 * result + isCheck.hashCode()
         result = 31 * result + gameResult.hashCode()
-        result = 31 * result + opponentOfferedDraw.hashCode()
+        result = 31 * result + drawOfferState.hashCode()
+        result = 31 * result + player1TimeLeftMs.hashCode()
+        result = 31 * result + player2TimeLeftMs.hashCode()
         result = 31 * result + chatMessages.hashCode()
         result = 31 * result + hasUnreadMessages.hashCode()
         return result
@@ -95,7 +438,8 @@ class ChessGameViewModel(
     private val getUserDataUseCase: GetUserDataUseCase,
     private val getCurrentUserIdUseCase: GetCurrentUserIdUseCase,
     private val getChatStreamUseCase: GetChatStreamUseCase,
-    private val sendMessageUseCase: SendMessageUseCase
+    private val sendMessageUseCase: SendMessageUseCase,
+    private val updateDrawOfferUseCase: UpdateDrawOfferUseCase
 ) : ViewModel() {
 
     private val gameEngine = ChessGameEngine()
@@ -106,11 +450,14 @@ class ChessGameViewModel(
     private var currentUserId: String? = null
     private var currentUserData: UserData? = null
     private var isChatSheetOpen = false
+    private var timerJob: Job? = null
 
     fun initializeGame(gameId: String, betAmount: Float) {
         this.gameId = gameId
         this.currentUserId = getCurrentUserIdUseCase()
-        // Fetch current user data to get their display name for chat
+
+        _uiState.value = GameUiState(board = gameEngine.board.value)
+
         viewModelScope.launch {
             currentUserId?.let {
                 getUserDataUseCase(it).collect { result ->
@@ -134,12 +481,12 @@ class ChessGameViewModel(
             tdsDeducted = tdsDeducted,
             winningsPayable = winningsPayable
         )
-        _uiState.value = _uiState.value.copy(prizeInfo = prizeInfo) // Set the prize info
-        val currentUserId = getCurrentUserIdUseCase()
-        if (gameId == "offline_game") { // Use a clearer ID
+        _uiState.value = _uiState.value.copy(prizeInfo = prizeInfo)
+
+        if (gameId == "offline_game") {
             gameEngine.resetBoard()
-            updateLocalUiState(PieceColor.WHITE) // Update UI with the initial board state
-            return // Stop here, don't try to fetch from Firestore
+            updateLocalUiState(PieceColor.WHITE)
+            return
         }
         listenForChatMessages(gameId)
 
@@ -151,10 +498,38 @@ class ChessGameViewModel(
                         val playerColor = if (gameState.player1Id == currentUserId) PieceColor.WHITE else PieceColor.BLACK
                         val opponentId = if (playerColor == PieceColor.WHITE) gameState.player2Id else gameState.player1Id
 
+                        // Update timer state from Firestore
+                        _uiState.value = _uiState.value.copy(
+                            player1TimeLeftMs = gameState.player1TimeLeft,
+                            player2TimeLeftMs = gameState.player2TimeLeft
+                        )
+
+                        // Handle draw offers
+                        if (gameState.drawOfferBy != null && gameState.drawOfferBy != currentUserId) {
+                            _uiState.value = _uiState.value.copy(drawOfferState = GameUiState.DrawOfferState.RECEIVED)
+                        } else if (gameState.drawOfferBy == null && _uiState.value.drawOfferState == GameUiState.DrawOfferState.RECEIVED) {
+                            _uiState.value = _uiState.value.copy(drawOfferState = GameUiState.DrawOfferState.NONE)
+                        }
+
                         gameEngine.resetBoard()
                         gameState.moves.forEach { move -> gameEngine.makeMove(move.from, move.to) }
 
                         updateLocalUiState(playerColor)
+
+                        if (gameState.status == "finished" || gameState.status == "draw") {
+                            val finalResult = if (gameState.status == "draw") {
+                                GameResult.Draw(DrawReason.AGREEMENT)
+                            } else {
+                                val winnerColor = if (gameState.winner == "WHITE") PieceColor.WHITE else PieceColor.BLACK
+                                GameResult.Win(winnerColor)
+                            }
+                            _uiState.value = _uiState.value.copy(gameResult = finalResult)
+                            timerJob?.cancel() // Stop the timer when game is over
+                        } else {
+                            // Start or switch the timer
+                            handleTimer(gameState)
+                        }
+
 
                         if (_uiState.value.opponentData == null && opponentId.isNotEmpty()) {
                             fetchOpponentData(opponentId)
@@ -167,7 +542,45 @@ class ChessGameViewModel(
             }
         }
     }
-    // --- NEW CHAT FUNCTIONS ---
+
+    private fun handleTimer(gameState: GameState) {
+        timerJob?.cancel() // Cancel any existing timer
+        if (gameState.status != "active") return
+
+        timerJob = viewModelScope.launch {
+            val isPlayer1Turn = gameState.currentPlayer == "WHITE"
+            var timeLeft = if (isPlayer1Turn) gameState.player1TimeLeft else gameState.player2TimeLeft
+            val lastMoveTime = gameState.lastMoveAt?.toDate()?.time ?: System.currentTimeMillis()
+            val timeSinceLastMove = System.currentTimeMillis() - lastMoveTime
+            timeLeft -= timeSinceLastMove
+
+            while (this.isActive && timeLeft > 0) {
+                if (isPlayer1Turn) {
+                    _uiState.value = _uiState.value.copy(player1TimeLeftMs = timeLeft)
+                } else {
+                    _uiState.value = _uiState.value.copy(player2TimeLeftMs = timeLeft)
+                }
+                delay(1000)
+                timeLeft -= 1000
+            }
+
+            if (this.isActive && timeLeft <= 0) {
+                handleTimeout()
+            }
+        }
+    }
+
+    private fun handleTimeout() {
+        if (gameId == null) return
+        val winner = if (_uiState.value.currentPlayer == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
+        val result = GameResult.Win(winner)
+        _uiState.value = _uiState.value.copy(gameResult = result)
+        viewModelScope.launch {
+            endGameUseCase(gameId!!, result)
+        }
+    }
+
+
     private fun listenForChatMessages(gameId: String) {
         if (gameId == "offline_game") return
 
@@ -273,23 +686,47 @@ class ChessGameViewModel(
     }
 
     fun resignGame() {
+        if (gameId == "offline_game" || gameId == null) return
         val winner = if (_uiState.value.playerColor == PieceColor.WHITE) PieceColor.BLACK else PieceColor.WHITE
         val result = GameResult.Win(winner)
+
+        _uiState.value = _uiState.value.copy(gameResult = result)
+        timerJob?.cancel()
+
         viewModelScope.launch {
             endGameUseCase(gameId!!, result)
         }
     }
 
     fun offerDraw() {
-        // TODO: Implement draw offer logic
+        if (gameId == "offline_game" || gameId == null || currentUserId == null) return
+        _uiState.value = _uiState.value.copy(drawOfferState = GameUiState.DrawOfferState.SENT)
+        viewModelScope.launch {
+            updateDrawOfferUseCase(gameId!!, currentUserId)
+        }
     }
 
     fun acceptDraw() {
+        if (gameId == "offline_game" || gameId == null) return
         val result = GameResult.Draw(DrawReason.AGREEMENT)
+
+        _uiState.value = _uiState.value.copy(gameResult = result, drawOfferState = GameUiState.DrawOfferState.NONE)
+        timerJob?.cancel()
+
         viewModelScope.launch {
             endGameUseCase(gameId!!, result)
+            updateDrawOfferUseCase(gameId!!, null)
         }
     }
+
+    fun rejectDraw() {
+        if (gameId == "offline_game" || gameId == null) return
+        _uiState.value = _uiState.value.copy(drawOfferState = GameUiState.DrawOfferState.NONE)
+        viewModelScope.launch {
+            updateDrawOfferUseCase(gameId!!, null)
+        }
+    }
+
 
     private fun updateLocalUiState(playerColor: PieceColor) {
         val newBoardState = gameEngine.board.value.map { it.clone() }.toTypedArray()
@@ -311,7 +748,7 @@ class ChessGameViewModel(
             playerColor = playerColor,
             isMyTurn = if (gameId != "offline_game") gameEngine.currentPlayer.value == playerColor else true,
             isCheck = gameEngine.isCheck.value,
-            gameResult = gameEngine.getGameResult(),
+            gameResult = if (_uiState.value.gameResult is GameResult.InProgress) gameEngine.getGameResult() else _uiState.value.gameResult,
             selectedPiece = null,
             validMoves = emptySet(),
             whiteCapturedPieces = whiteCaptured,
@@ -319,5 +756,9 @@ class ChessGameViewModel(
             lastMove = gameEngine.gameHistory.lastOrNull()?.let { it.from to it.to }
         )
     }
-}
 
+    override fun onCleared() {
+        super.onCleared()
+        timerJob?.cancel()
+    }
+}

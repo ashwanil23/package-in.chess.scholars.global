@@ -2,7 +2,8 @@ package `in`.chess.scholars.global.domain.model
 
 import com.google.firebase.firestore.ServerTimestamp
 import com.google.firebase.Timestamp
-
+// Default time for a 5-minute game in milliseconds
+const val DEFAULT_GAME_TIME_MS = 300_000L
 data class UserData(
     val uid: String = "",
     val email: String = "",
@@ -77,7 +78,8 @@ enum class DrawReason {
     THREEFOLD_REPETITION,
     FIFTY_MOVE_RULE,
     SEVENTY_FIVE_MOVE_RULE,
-    AGREEMENT
+    AGREEMENT,
+    TIMEOUT_VS_INSUFFICIENT_MATERIAL // CORRECTED: Added reason for timeout draw
 }
 
 /**
@@ -163,6 +165,9 @@ data class GameState(
     val winner: String? = null,
     val drawReason: String? = null,
     val betAmount: Float = 0f, // 👈 Add this
+    val drawOfferBy: String? = null,
+    val player1TimeLeft: Long = DEFAULT_GAME_TIME_MS,
+    val player2TimeLeft: Long = DEFAULT_GAME_TIME_MS,
     @ServerTimestamp
     val createdAt: Timestamp? = null,
     @ServerTimestamp
