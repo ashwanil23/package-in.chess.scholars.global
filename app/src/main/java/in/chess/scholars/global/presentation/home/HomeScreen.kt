@@ -60,7 +60,6 @@ fun HomeScreen(
                 PremiumBottomBar(navController)
             }
         ) { paddingValues ->
-            // CORRECTED: Using LazyColumn for the main screen content is good for performance.
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -113,9 +112,10 @@ fun HomeScreen(
             }
         }
 
-        // Bet Dialog
+        // CORRECTED: Pass user balance to the bet dialog
         if (showBetDialog) {
             PremiumBetDialog(
+                userBalance = userData?.balance ?: 0.0,
                 onDismiss = { showBetDialog = false },
                 onConfirm = { amount ->
                     showBetDialog = false
@@ -145,12 +145,11 @@ private fun ActiveTournamentsSection(navController: NavController) {
             }
         }
 
-        // CORRECTED: Added keys to items in LazyRow for better performance.
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(3, key = { it }) { index ->
+            items(3) { index ->
                 TournamentCard(
                     title = when(index) {
                         0 -> "Weekend Warrior"
@@ -384,12 +383,17 @@ private fun PremiumButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PremiumBetDialog(
+    userBalance: Double,
     onDismiss: () -> Unit,
     onConfirm: (Float) -> Unit
 ) {
     var selectedAmount by remember { mutableStateOf<Float?>(null) }
     var customAmount by remember { mutableStateOf("") }
     val predefinedAmounts = listOf(100f, 500f, 1000f, 5000f)
+
+    val isCustomAmountValid = customAmount.toFloatOrNull()?.let { it <= userBalance && it >= 100 } ?: false
+    val isConfirmEnabled = selectedAmount != null || (customAmount.isNotEmpty() && isCustomAmountValid)
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -421,7 +425,7 @@ private fun PremiumBetDialog(
                 )
 
                 Text(
-                    "Choose your stake wisely",
+                    "Balance: ₹${String.format("%.2f", userBalance)}",
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.padding(top = 4.dp)
@@ -435,11 +439,15 @@ private fun PremiumBetDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(predefinedAmounts) { amount ->
+                        val isEnabled = userBalance >= amount
                         FilterChip(
+                            enabled = isEnabled,
                             selected = selectedAmount == amount,
                             onClick = {
-                                selectedAmount = amount
-                                customAmount = ""
+                                if (isEnabled) {
+                                    selectedAmount = amount
+                                    customAmount = ""
+                                }
                             },
                             label = {
                                 Text(
@@ -451,7 +459,9 @@ private fun PremiumBetDialog(
                                 selectedContainerColor = Color(0xFF4ECDC4),
                                 selectedLabelColor = Color.White,
                                 containerColor = Color.White.copy(alpha = 0.1f),
-                                labelColor = Color.White
+                                labelColor = Color.White,
+                                disabledContainerColor = Color.Gray.copy(alpha = 0.1f),
+                                disabledLabelColor = Color.Gray
                             )
                         )
                     }
@@ -480,8 +490,18 @@ private fun PremiumBetDialog(
                     ),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isError = customAmount.isNotEmpty() && !isCustomAmountValid
                 )
+                if (customAmount.isNotEmpty() && !isCustomAmountValid) {
+                    Text(
+                        "Amount must be between ₹100 and your balance.",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -504,7 +524,7 @@ private fun PremiumBetDialog(
                             amount?.let { onConfirm(it) }
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = selectedAmount != null || customAmount.isNotEmpty(),
+                        enabled = isConfirmEnabled,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF4ECDC4),
@@ -532,21 +552,7 @@ private fun PremiumBackground() {
         )
     )
 
-    // Using a simple gradient as the complex Canvas can be a source of performance issues.
-    // The original Canvas code is kept here as a comment for reference.
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(
-            Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF0A0A0F),
-                    Color(0xFF1A1A2E),
-                    Color(0xFF16213E)
-                )
-            )
-        )
-    )
-    /*
+    // CORRECTED: Restored the animated Canvas background
     Canvas(modifier = Modifier.fillMaxSize()) {
         // Base gradient
         drawRect(
@@ -601,7 +607,6 @@ private fun PremiumBackground() {
             )
         }
     }
-    */
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1182,3 +1187,4 @@ private fun FeatureCard(
         }
     }
 }
+

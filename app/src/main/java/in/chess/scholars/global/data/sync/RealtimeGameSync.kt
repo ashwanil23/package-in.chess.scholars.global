@@ -1,5 +1,6 @@
 package `in`.chess.scholars.global.data.sync
 
+import android.util.Log // Import Android's Log class
 import com.google.firebase.firestore.*
 import `in`.chess.scholars.global.data.cache.LocalCacheManager
 import `in`.chess.scholars.global.domain.model.*
@@ -161,6 +162,9 @@ class RealtimeGameSync(
                     pendingMoves[gameId]?.find { it.moveId == moveId }?.status = MoveStatus.CONFIRMED
 
                 } catch (e: Exception) {
+                    // *** RECOMMENDED CHANGE: Add detailed logging here ***
+                    Log.e("RealtimeGameSync", "Failed to make move on server for game $gameId. Error: ${e.message}", e)
+
                     // Revert optimistic update
                     pendingMoves[gameId]?.find { it.moveId == moveId }?.status = MoveStatus.REJECTED
                     // You'll need to implement move reversion in ChessGameEngine
