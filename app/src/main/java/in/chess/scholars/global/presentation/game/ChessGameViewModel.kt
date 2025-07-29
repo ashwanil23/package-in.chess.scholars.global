@@ -43,7 +43,6 @@ data class GameUiState(
     val isCheck: Boolean = false,
     val gameResult: GameResult = GameResult.InProgress,
     val drawOfferState: DrawOfferState = DrawOfferState.NONE,
-    // CORRECTED: Added timer values to UI state
     val player1TimeLeftMs: Long = DEFAULT_GAME_TIME_MS,
     val player2TimeLeftMs: Long = DEFAULT_GAME_TIME_MS
 ) {
@@ -138,11 +137,18 @@ class ChessGameViewModel(
             }
         }
 
+        // *** FIX: Adjusted platform fee and clarified prize calculations ***
+        // The prize pool is the sum of both players' bets.
         val prizePool = betAmount * 2
-        val platformFee = prizePool * 0.04f
+        // The platform takes a fee (e.g., 10%) from the total prize pool.
+        val platformFee = prizePool * 0.10f
+        // The winner's net profit (on which tax is calculated).
         val netWinnings = prizePool - platformFee - betAmount
+        // Tax Deducted at Source (TDS) is 30% of net winnings, as per Indian law.
         val tdsDeducted = if (netWinnings > 0) netWinnings * 0.30f else 0f
+        // The final amount the winner receives.
         val winningsPayable = prizePool - platformFee - tdsDeducted
+
         val prizeInfo = PrizeInfo(
             betAmount = betAmount,
             prizePool = prizePool,
@@ -168,13 +174,11 @@ class ChessGameViewModel(
                         val playerColor = if (gameState.player1Id == currentUserId) PieceColor.WHITE else PieceColor.BLACK
                         val opponentId = if (playerColor == PieceColor.WHITE) gameState.player2Id else gameState.player1Id
 
-                        // Update timer state from Firestore
                         _uiState.value = _uiState.value.copy(
                             player1TimeLeftMs = gameState.player1TimeLeft,
                             player2TimeLeftMs = gameState.player2TimeLeft
                         )
 
-                        // Handle draw offers
                         if (gameState.drawOfferBy != null && gameState.drawOfferBy != currentUserId) {
                             _uiState.value = _uiState.value.copy(drawOfferState = GameUiState.DrawOfferState.RECEIVED)
                         } else if (gameState.drawOfferBy == null && _uiState.value.drawOfferState == GameUiState.DrawOfferState.RECEIVED) {
@@ -194,9 +198,8 @@ class ChessGameViewModel(
                                 GameResult.Win(winnerColor)
                             }
                             _uiState.value = _uiState.value.copy(gameResult = finalResult)
-                            timerJob?.cancel() // Stop the timer when game is over
+                            timerJob?.cancel()
                         } else {
-                            // Start or switch the timer
                             handleTimer(gameState)
                         }
 
@@ -214,7 +217,7 @@ class ChessGameViewModel(
     }
 
     private fun handleTimer(gameState: GameState) {
-        timerJob?.cancel() // Cancel any existing timer
+        timerJob?.cancel()
         if (gameState.status != "active") return
 
         timerJob = viewModelScope.launch {

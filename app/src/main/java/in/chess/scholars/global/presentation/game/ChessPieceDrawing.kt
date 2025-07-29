@@ -94,6 +94,7 @@ import `in`.chess.scholars.global.domain.model.PieceType
 import androidx.compose.ui.geometry.minDimension
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.times
 import `in`.chess.scholars.global.domain.model.ChatMessage
 import `in`.chess.scholars.global.domain.model.ChessPiece
 import kotlinx.coroutines.launch
@@ -324,55 +325,21 @@ fun CheckIndicator() {
 
 @Composable
 fun FileRankLabels(squareSize: Dp, isBoardFlipped: Boolean) {
-    val files = listOf("a", "b", "c", "d", "e", "f", "g", "h")
-    val ranks = listOf("8", "7", "6", "5", "4", "3", "2", "1")
-
+    val files = if (isBoardFlipped) listOf("h", "g", "f", "e", "d", "c", "b", "a") else listOf("a", "b", "c", "d", "e", "f", "g", "h")
+    val ranks = if (isBoardFlipped) listOf("1", "2", "3", "4", "5", "6", "7", "8") else listOf("8", "7", "6", "5", "4", "3", "2", "1")
     // File labels (bottom)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(20.dp)
-            .offset(y = squareSize * 8 - 20.dp)
-    ) {
-        files.forEachIndexed { index, file ->
-            val displayIndex = if (isBoardFlipped) 7 - index else index
-            Box(
-                modifier = Modifier
-                    .width(squareSize)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    files[displayIndex],
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+    Row(modifier = Modifier.fillMaxWidth().offset(y = 8 * squareSize)) {
+        files.forEach { file ->
+            Box(modifier = Modifier.width(squareSize), contentAlignment = Alignment.Center) {
+                Text(file, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
             }
         }
     }
-
     // Rank labels (left)
-    Column(
-        modifier = Modifier
-            .width(20.dp)
-            .fillMaxHeight()
-            .offset(x = (-20).dp)
-    ) {
-        ranks.forEachIndexed { index, rank ->
-            val displayIndex = if (isBoardFlipped) 7 - index else index
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(squareSize),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    ranks[displayIndex],
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+    Column(modifier = Modifier.fillMaxHeight().offset(x = (-20).dp)) {
+        ranks.forEach { rank ->
+            Box(modifier = Modifier.height(squareSize), contentAlignment = Alignment.Center) {
+                Text(rank, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp)
             }
         }
     }
@@ -442,13 +409,28 @@ fun GameControlsBar(
 // For the captured pieces
 @Composable
 fun CapturedPiecesRow(pieces: List<ChessPiece>) {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().height(24.dp).padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(28.dp) // Ensure a consistent height
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        contentAlignment = Alignment.CenterStart
     ) {
-        items(pieces) { piece ->
-            Canvas(modifier = Modifier.size(20.dp)) {
-                drawChessPiece(pieceType = piece.type, pieceColor = piece.color)
+        if (pieces.isEmpty()) {
+            Text(
+                text = "No pieces captured",
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.4f)
+            )
+        } else {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(pieces) { piece ->
+                    Canvas(modifier = Modifier.size(20.dp)) {
+                        drawChessPiece(pieceType = piece.type, pieceColor = piece.color)
+                    }
+                }
             }
         }
     }
@@ -458,37 +440,39 @@ fun CapturedPiecesRow(pieces: List<ChessPiece>) {
 @Composable
 fun GameInfoSheetContent(prizeInfo: PrizeInfo) {
     LazyColumn(contentPadding = PaddingValues(16.dp), modifier = Modifier.fillMaxWidth()) {
-        item {
-            Text("Game Information", fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
-        }
-        item { InfoRow("Bet Amount", "₹${prizeInfo.betAmount}") }
-        item { InfoRow("Prize Pool (2x)", "₹${prizeInfo.prizePool}") }
-        item { InfoRow("Platform Fee (4%)", "- ₹${"%.2f".format(prizeInfo.platformFee)}", isDeduction = true) }
+        item { Text("Game Information", fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp)) }
+        item { InfoRow("Bet Amount", prizeInfo.betAmount) }
+        item { InfoRow("Prize Pool (2x)", prizeInfo.prizePool) }
+        item { InfoRow("Platform Fee (10%)", prizeInfo.platformFee, isDeduction = true) }
         item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
-        item { InfoRow("Net Winnings", "₹${"%.2f".format(prizeInfo.taxableAmount)}") }
-        item { InfoRow("TDS (30% of Winnings)", "- ₹${"%.2f".format(prizeInfo.tdsDeducted)}", isDeduction = true) }
+        item { InfoRow("Net Winnings", prizeInfo.taxableAmount) }
+        item { InfoRow("TDS (30% of Winnings)", prizeInfo.tdsDeducted, isDeduction = true) }
         item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
-        item {
-            InfoRow("Final Payout to Winner", "₹${"%.2f".format(prizeInfo.winningsPayable)}", isHighlight = true)
-        }
+        item { InfoRow("Final Payout to Winner", prizeInfo.winningsPayable, isHighlight = true) }
     }
 }
 
 @Composable
-fun InfoRow(label: String, value: String, isDeduction: Boolean = false, isHighlight: Boolean = false) {
+fun InfoRow(label: String, amount: Float, isDeduction: Boolean = false, isHighlight: Boolean = false) {
+    // Format the numeric amount into a currency string with the "₹" symbol.
+    val formattedAmount = "₹${"%.2f".format(amount)}"
+
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(label, color = if (isHighlight) Color.White else Color.Gray)
         Text(
-            value,
+            // The sign is determined by the `isDeduction` flag, separate from the value itself.
+            text = if (isDeduction) "- $formattedAmount" else formattedAmount,
             color = when {
                 isHighlight -> Color(0xFF4CAF50)
                 isDeduction -> Color(0xFFFF5252)
                 else -> Color.White
             },
-            fontWeight = if(isHighlight) FontWeight.Bold else FontWeight.Normal
+            fontWeight = if (isHighlight) FontWeight.Bold else FontWeight.Normal
         )
     }
 }
