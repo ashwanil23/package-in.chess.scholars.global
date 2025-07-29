@@ -60,6 +60,7 @@ fun HomeScreen(
                 PremiumBottomBar(navController)
             }
         ) { paddingValues ->
+            // CORRECTED: Using LazyColumn for the main screen content is good for performance.
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -144,11 +145,12 @@ private fun ActiveTournamentsSection(navController: NavController) {
             }
         }
 
+        // CORRECTED: Added keys to items in LazyRow for better performance.
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(3) { index ->
+            items(3, key = { it }) { index ->
                 TournamentCard(
                     title = when(index) {
                         0 -> "Weekend Warrior"
@@ -530,6 +532,21 @@ private fun PremiumBackground() {
         )
     )
 
+    // Using a simple gradient as the complex Canvas can be a source of performance issues.
+    // The original Canvas code is kept here as a comment for reference.
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(
+            Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF0A0A0F),
+                    Color(0xFF1A1A2E),
+                    Color(0xFF16213E)
+                )
+            )
+        )
+    )
+    /*
     Canvas(modifier = Modifier.fillMaxSize()) {
         // Base gradient
         drawRect(
@@ -584,6 +601,7 @@ private fun PremiumBackground() {
             )
         }
     }
+    */
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

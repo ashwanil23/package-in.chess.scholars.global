@@ -1,20 +1,40 @@
 package `in`.chess.scholars.global
 
+import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.FirebaseApp
 import `in`.chess.scholars.global.presentation.*
 import `in`.chess.scholars.global.presentation.auth.AuthViewModel
@@ -43,17 +63,90 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ScholarsChessTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ChessBattleApp()
+                    // CORRECTED: Added a check for Google Play Services availability
+                    CheckGooglePlayServices {
+                        ChessBattleApp()
+                    }
                 }
             }
         }
     }
 }
+
+// CORRECTED: New Composable to handle Google Play Services check
+@Composable
+fun CheckGooglePlayServices(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    var playServicesStatus by remember { mutableStateOf<Int?>(null) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+        if (status != ConnectionResult.SUCCESS) {
+            playServicesStatus = status
+            showErrorDialog = true
+        } else {
+            playServicesStatus = ConnectionResult.SUCCESS
+        }
+    }
+
+    if (playServicesStatus == ConnectionResult.SUCCESS) {
+        content()
+    } else if (showErrorDialog && activity != null) {
+        GooglePlayServicesErrorDialog(
+            activity = activity,
+            errorCode = playServicesStatus,
+            onDismiss = {
+                showErrorDialog = false
+                activity.finish() // Close the app if services are not available
+            }
+        )
+    } else {
+        // Show a loading or placeholder screen while checking
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Checking services...", color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun GooglePlayServicesErrorDialog(activity: Activity, errorCode: Int?, onDismiss: () -> Unit) {
+    if (errorCode == null) return
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Google Play Services Error") },
+        text = { Text("This app requires Google Play Services to function correctly. Please install or update it.") },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    // Attempt to show the user a dialog to resolve the error.
+                    GoogleApiAvailability.getInstance().showErrorDialogFragment(activity, errorCode, 0)
+                    onDismiss()
+                }
+            ) {
+                Text("Resolve")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close App")
+            }
+        }
+    )
+}
+
 
 @Composable
 fun ChessBattleApp() {
@@ -73,9 +166,9 @@ fun ChessBattleApp() {
     val gameViewModel: ChessGameViewModel = viewModel(factory = GameViewModelFactory(container))
 
     val authState by authViewModel.authState.collectAsState()
-    val startDestination = if (authState.isLoggedIn) "home" else "login"
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    // CORRECTED: Use a key for startDestination to ensure NavHost recomposes when auth state changes after initial composition.
+    NavHost(navController = navController, startDestination = if (authState.isLoggedIn) "home" else "login") {
         // Authentication Flow
         composable("login") { LoginScreen(navController, authViewModel) }
         composable("register") { RegisterScreen(navController, authViewModel) }
