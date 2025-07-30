@@ -135,173 +135,236 @@ private fun DrawScope.drawPawn(fillColor: Color, strokeColor: Color) {
     val h = size.height
     val strokeWidth = w * 0.05f
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(fillColor.copy(alpha = 0.8f), fillColor),
+        start = Offset(0f, 0f),
+        end = Offset(w, h)
+    )
+
     val path = Path().apply {
-        moveTo(w * 0.3f, h * 0.9f)
-        lineTo(w * 0.7f, h * 0.9f)
-        arcTo(Rect(w * 0.2f, h * 0.8f, w * 0.8f, h * 1.0f), 0f, 180f, false)
+        // Base
+        moveTo(w * 0.25f, h * 0.95f)
+        quadraticBezierTo(w * 0.1f, h * 0.8f, w * 0.25f, h * 0.65f)
+        lineTo(w * 0.75f, h * 0.65f)
+        quadraticBezierTo(w * 0.9f, h * 0.8f, w * 0.75f, h * 0.95f)
         close()
 
-        moveTo(w * 0.4f, h * 0.8f)
-        lineTo(w * 0.4f, h * 0.6f)
-        lineTo(w * 0.6f, h * 0.6f)
-        lineTo(w * 0.6f, h * 0.8f)
+        // Stem
+        moveTo(w * 0.35f, h * 0.65f)
+        lineTo(w * 0.35f, h * 0.45f)
+        lineTo(w * 0.65f, h * 0.45f)
+        lineTo(w * 0.65f, h * 0.65f)
         close()
+
+        // Collar
+        addOval(Rect(w * 0.3f, h * 0.4f, w * 0.7f, h * 0.5f))
     }
 
-    drawPath(path, fillColor)
+    drawPath(path, gradient)
     drawPath(path, strokeColor, style = Stroke(strokeWidth))
 
-    drawCircle(fillColor, w * 0.2f, center = Offset(w * 0.5f, h * 0.4f))
-    drawCircle(strokeColor, w * 0.2f, center = Offset(w * 0.5f, h * 0.4f), style = Stroke(strokeWidth))
+    // Head sphere with highlight
+    drawCircle(gradient, w * 0.25f, center = Offset(w * 0.5f, h * 0.25f))
+    drawCircle(strokeColor, w * 0.25f, center = Offset(w * 0.5f, h * 0.25f), style = Stroke(strokeWidth))
+    drawCircle(fillColor.copy(alpha = 0.3f), w * 0.1f, center = Offset(w * 0.4f, h * 0.15f)) // Highlight
 }
+
 
 private fun DrawScope.drawRook(fillColor: Color, strokeColor: Color) {
     val w = size.width
     val h = size.height
     val strokeWidth = w * 0.05f
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(fillColor.copy(alpha = 0.7f), fillColor),
+        start = Offset(0f, 0f),
+        end = Offset(w, h)
+    )
+
     val path = Path().apply {
-        moveTo(w * 0.2f, h * 0.9f)
-        lineTo(w * 0.8f, h * 0.9f)
-        lineTo(w * 0.8f, h * 0.8f)
-        lineTo(w * 0.7f, h * 0.8f)
-        lineTo(w * 0.7f, h * 0.35f)
-        lineTo(w * 0.8f, h * 0.25f)
-        lineTo(w * 0.8f, h * 0.1f)
-        lineTo(w * 0.65f, h * 0.1f)
-        lineTo(w * 0.65f, h * 0.2f)
-        lineTo(w * 0.55f, h * 0.2f)
-        lineTo(w * 0.55f, h * 0.1f)
-        lineTo(w * 0.45f, h * 0.1f)
-        lineTo(w * 0.45f, h * 0.2f)
+        // Base
+        moveTo(w * 0.2f, h * 0.95f)
+        lineTo(w * 0.8f, h * 0.95f)
+        lineTo(w * 0.75f, h * 0.8f)
+        quadraticBezierTo(w * 0.8f, h * 0.6f, w * 0.7f, h * 0.4f)
+        lineTo(w * 0.3f, h * 0.4f)
+        quadraticBezierTo(w * 0.2f, h * 0.6f, w * 0.25f, h * 0.8f)
+        close()
+
+        // Battlements
+        moveTo(w * 0.25f, h * 0.4f)
+        lineTo(w * 0.25f, h * 0.2f)
         lineTo(w * 0.35f, h * 0.2f)
-        lineTo(w * 0.35f, h * 0.1f)
-        lineTo(w * 0.2f, h * 0.1f)
-        lineTo(w * 0.2f, h * 0.25f)
-        lineTo(w * 0.3f, h * 0.35f)
-        lineTo(w * 0.3f, h * 0.8f)
-        lineTo(w * 0.2f, h * 0.8f)
+        lineTo(w * 0.35f, h * 0.3f)
+        lineTo(w * 0.45f, h * 0.3f)
+        lineTo(w * 0.45f, h * 0.2f)
+        lineTo(w * 0.55f, h * 0.2f)
+        lineTo(w * 0.55f, h * 0.3f)
+        lineTo(w * 0.65f, h * 0.3f)
+        lineTo(w * 0.65f, h * 0.2f)
+        lineTo(w * 0.75f, h * 0.2f)
+        lineTo(w * 0.75f, h * 0.4f)
         close()
     }
-    drawPath(path, fillColor)
-    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(path, gradient)
+    drawPath(path, strokeColor, style = Stroke(strokeWidth))
 }
+
 
 private fun DrawScope.drawKnight(fillColor: Color, strokeColor: Color) {
     val w = size.width
     val h = size.height
     val strokeWidth = w * 0.05f
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(fillColor.copy(alpha = 0.6f), fillColor),
+        start = Offset(0f, 0f),
+        end = Offset(w, h)
+    )
+
     val path = Path().apply {
-        moveTo(w * 0.2f, h * 0.9f)
-        lineTo(w * 0.8f, h * 0.9f)
-        lineTo(w * 0.75f, h * 0.7f)
-        cubicTo(w * 0.8f, h * 0.5f, w * 0.6f, h * 0.5f, w * 0.55f, h * 0.4f)
-        lineTo(w * 0.75f, h * 0.2f)
-        quadraticBezierTo(w * 0.8f, h * 0.1f, w * 0.7f, h * 0.1f)
-        quadraticBezierTo(w * 0.6f, h * 0.15f, w * 0.5f, h * 0.25f)
-        lineTo(w * 0.4f, h * 0.15f)
-        lineTo(w * 0.3f, h * 0.3f)
-        lineTo(w * 0.25f, h * 0.2f)
-        lineTo(w * 0.2f, h * 0.4f)
-        cubicTo(w * 0.3f, h * 0.6f, w * 0.2f, h * 0.7f, w * 0.25f, h * 0.7f)
+        // Base
+        moveTo(w * 0.25f, h * 0.95f)
+        lineTo(w * 0.75f, h * 0.95f)
+        quadraticBezierTo(w * 0.9f, h * 0.7f, w * 0.7f, h * 0.6f)
+
+        // Horse head
+        cubicTo(w * 0.8f, h * 0.4f, w * 0.6f, h * 0.3f, w * 0.5f, h * 0.15f)
+        quadraticBezierTo(w * 0.4f, h * 0.1f, w * 0.3f, h * 0.2f)
+        lineTo(w * 0.2f, h * 0.1f)
+        quadraticBezierTo(w * 0.15f, h * 0.3f, w * 0.25f, h * 0.4f)
+        cubicTo(w * 0.1f, h * 0.5f, w * 0.2f, h * 0.7f, w * 0.3f, h * 0.8f)
+        close()
+
+        // Ear detail
+        moveTo(w * 0.35f, h * 0.25f)
+        quadraticBezierTo(w * 0.3f, h * 0.15f, w * 0.4f, h * 0.2f)
         close()
     }
-    drawPath(path, fillColor)
-    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(path, gradient)
+    drawPath(path, strokeColor, style = Stroke(strokeWidth))
 }
+
 
 private fun DrawScope.drawBishop(fillColor: Color, strokeColor: Color) {
     val w = size.width
     val h = size.height
     val strokeWidth = w * 0.05f
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(fillColor.copy(alpha = 0.8f), fillColor),
+        start = Offset(0f, 0f),
+        end = Offset(w, h)
+    )
+
     val path = Path().apply {
-        moveTo(w * 0.5f, h * 0.1f) // Top point
-        quadraticBezierTo(w * 0.8f, h * 0.4f, w * 0.7f, h * 0.8f)
-        lineTo(w * 0.75f, h * 0.9f)
-        lineTo(w * 0.25f, h * 0.9f)
-        lineTo(w * 0.3f, h * 0.8f)
-        quadraticBezierTo(w * 0.2f, h * 0.4f, w * 0.5f, h * 0.1f)
+        // Base
+        moveTo(w * 0.3f, h * 0.95f)
+        quadraticBezierTo(w * 0.1f, h * 0.8f, w * 0.3f, h * 0.65f)
+        lineTo(w * 0.7f, h * 0.65f)
+        quadraticBezierTo(w * 0.9f, h * 0.8f, w * 0.7f, h * 0.95f)
+        close()
+
+        // Body and mitre
+        moveTo(w * 0.4f, h * 0.65f)
+        quadraticBezierTo(w * 0.2f, h * 0.3f, w * 0.5f, h * 0.1f)
+        quadraticBezierTo(w * 0.8f, h * 0.3f, w * 0.6f, h * 0.65f)
         close()
     }
-    drawPath(path, fillColor)
-    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(path, gradient)
+    drawPath(path, strokeColor, style = Stroke(strokeWidth))
 
-    // Mitre cleft
+    // Mitre slit with depth
     drawLine(
         color = strokeColor,
         start = Offset(w * 0.5f, h * 0.15f),
-        end = Offset(w * 0.5f, h * 0.3f),
-        strokeWidth = strokeWidth / 2
+        end = Offset(w * 0.5f, h * 0.35f),
+        strokeWidth = strokeWidth / 1.5f
     )
 }
+
 
 private fun DrawScope.drawQueen(fillColor: Color, strokeColor: Color) {
     val w = size.width
     val h = size.height
     val strokeWidth = w * 0.05f
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(fillColor.copy(alpha = 0.7f), fillColor),
+        start = Offset(0f, 0f),
+        end = Offset(w, h)
+    )
+
     val path = Path().apply {
-        moveTo(w * 0.2f, h * 0.9f)
-        lineTo(w * 0.8f, h * 0.9f)
-        lineTo(w * 0.75f, h * 0.8f)
-        cubicTo(w * 0.9f, h * 0.6f, w * 0.6f, h * 0.5f, w * 0.6f, h * 0.4f)
-        lineTo(w * 0.4f, h * 0.4f)
-        cubicTo(w * 0.4f, h * 0.5f, w * 0.1f, h * 0.6f, w * 0.25f, h * 0.8f)
+        // Base
+        moveTo(w * 0.25f, h * 0.95f)
+        lineTo(w * 0.75f, h * 0.95f)
+        quadraticBezierTo(w * 0.85f, h * 0.7f, w * 0.65f, h * 0.55f)
+        lineTo(w * 0.35f, h * 0.55f)
+        quadraticBezierTo(w * 0.15f, h * 0.7f, w * 0.25f, h * 0.95f)
         close()
     }
-    drawPath(path, fillColor)
-    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(path, gradient)
+    drawPath(path, strokeColor, style = Stroke(strokeWidth))
 
     val crownPath = Path().apply {
-        moveTo(w * 0.4f, h * 0.4f)
-        lineTo(w * 0.3f, h * 0.2f)
-        lineTo(w * 0.4f, h * 0.3f)
-        lineTo(w * 0.5f, h * 0.15f)
-        lineTo(w * 0.6f, h * 0.3f)
-        lineTo(w * 0.7f, h * 0.2f)
-        lineTo(w * 0.6f, h * 0.4f)
+        moveTo(w * 0.35f, h * 0.55f)
+        quadraticBezierTo(w * 0.3f, h * 0.3f, w * 0.4f, h * 0.25f)
+        lineTo(w * 0.35f, h * 0.15f)
+        lineTo(w * 0.45f, h * 0.2f)
+        lineTo(w * 0.5f, h * 0.1f)
+        lineTo(w * 0.55f, h * 0.2f)
+        lineTo(w * 0.65f, h * 0.15f)
+        lineTo(w * 0.6f, h * 0.25f)
+        quadraticBezierTo(w * 0.7f, h * 0.3f, w * 0.65f, h * 0.55f)
         close()
     }
-    drawPath(crownPath, fillColor)
-    drawPath(crownPath, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(crownPath, gradient)
+    drawPath(crownPath, strokeColor, style = Stroke(strokeWidth))
 }
+
 
 private fun DrawScope.drawKing(fillColor: Color, strokeColor: Color) {
     val w = size.width
     val h = size.height
     val strokeWidth = w * 0.05f
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(fillColor.copy(alpha = 0.8f), fillColor),
+        start = Offset(0f, 0f),
+        end = Offset(w, h)
+    )
+
     val path = Path().apply {
-        moveTo(w * 0.25f, h * 0.95f)
-        lineTo(w * 0.75f, h * 0.95f)
-        lineTo(w * 0.7f, h * 0.85f)
-        quadraticBezierTo(w * 0.5f, h * 0.75f, w * 0.6f, h * 0.5f)
-        lineTo(w * 0.6f, h * 0.45f)
-        lineTo(w * 0.4f, h * 0.45f)
-        lineTo(w * 0.4f, h * 0.5f)
-        quadraticBezierTo(w * 0.5f, h * 0.75f, w * 0.3f, h * 0.85f)
+        // Base
+        moveTo(w * 0.2f, h * 0.95f)
+        lineTo(w * 0.8f, h * 0.95f)
+        quadraticBezierTo(w * 0.9f, h * 0.7f, w * 0.7f, h * 0.55f)
+        lineTo(w * 0.3f, h * 0.55f)
+        quadraticBezierTo(w * 0.1f, h * 0.7f, w * 0.2f, h * 0.95f)
         close()
     }
-    drawPath(path, fillColor)
-    drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(path, gradient)
+    drawPath(path, strokeColor, style = Stroke(strokeWidth))
 
     val crownPath = Path().apply {
-        moveTo(w * 0.4f, h * 0.45f)
-        lineTo(w * 0.3f, h * 0.2f)
-        lineTo(w * 0.5f, h * 0.3f)
-        lineTo(w * 0.7f, h * 0.2f)
-        lineTo(w * 0.6f, h * 0.45f)
+        moveTo(w * 0.3f, h * 0.55f)
+        quadraticBezierTo(w * 0.25f, h * 0.35f, w * 0.35f, h * 0.3f)
+        lineTo(w * 0.4f, h * 0.2f)
+        lineTo(w * 0.5f, h * 0.25f)
+        lineTo(w * 0.6f, h * 0.2f)
+        lineTo(w * 0.65f, h * 0.3f)
+        quadraticBezierTo(w * 0.75f, h * 0.35f, w * 0.7f, h * 0.55f)
         close()
     }
-    drawPath(crownPath, fillColor)
-    drawPath(crownPath, strokeColor, style = Stroke(width = strokeWidth))
+    drawPath(crownPath, gradient)
+    drawPath(crownPath, strokeColor, style = Stroke(strokeWidth))
 
-    // Cross on top
-    drawLine(strokeColor, Offset(w * 0.5f, h * 0.05f), Offset(w * 0.5f, h * 0.2f), strokeWidth)
-    drawLine(strokeColor, Offset(w * 0.4f, h * 0.12f), Offset(w * 0.6f, h * 0.12f), strokeWidth)
+    // Cross with bevel
+    drawLine(strokeColor, Offset(w * 0.5f, h * 0.05f), Offset(w * 0.5f, h * 0.25f), strokeWidth)
+    drawLine(strokeColor, Offset(w * 0.4f, h * 0.15f), Offset(w * 0.6f, h * 0.15f), strokeWidth)
 }
+
 @Composable
 fun CheckIndicator() {
     val infiniteTransition = rememberInfiniteTransition()
